@@ -6,6 +6,7 @@ import com.tinkerpop.blueprints.Vertex;
 import de.uniko.sebschlicht.socialnet.StatusUpdate;
 import de.uniko.sebschlicht.socialnet.StatusUpdateList;
 import de.uniko.sebschlicht.titan.socialnet.SocialGraph;
+import de.uniko.sebschlicht.titan.socialnet.model.UserProxy;
 
 /**
  * social graph for Graphity implementations
@@ -42,7 +43,10 @@ public abstract class Graphity extends SocialGraph {
      *         specified
      */
     protected Vertex findUser(long userIdentifier) {
-        //TODO access index
+        for (Vertex vUser : graphDb.getVertices(UserProxy.PROP_IDENTIFIER,
+                userIdentifier)) {
+            return vUser;
+        }
         return null;
     }
 
@@ -76,9 +80,25 @@ public abstract class Graphity extends SocialGraph {
     }
 
     @Override
-    public boolean addFollowship(String idFollowing, String idFollowed) {
+    public boolean addFollowship(String sIdFollowing, String sIdFollowed) {
         //TODO transaction handling and locking, then call addFollowship with vertices resolved
-        return false;
+        try {
+            long idFollowing = Long.valueOf(sIdFollowing);
+            long idFollowed = Long.valueOf(sIdFollowed);
+            if (idFollowing <= 0 || idFollowed <= 0) {
+                throw new IllegalArgumentException(
+                        "node ids must be greater than zero");
+            }
+            Vertex vFollowing = loadUser(idFollowing);
+            Vertex vFollowed = loadUser(idFollowed);
+            return addFollowship(vFollowing, vFollowed);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return false;
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**

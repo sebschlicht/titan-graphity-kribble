@@ -2,7 +2,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.uniko.sebschlicht</groupId>
-  <artifactId>titan-graphity-kribble</artifactId>
+  <artifactId>titan-graphity-kibble</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 
   <licenses>
@@ -32,6 +32,7 @@
     <titan.version>0.5.0</titan.version>
     <metalcon.muid>0.4.2</metalcon.muid>
     <socialnet.version>0.0.1-SNAPSHOT</socialnet.version>
+    <rexster.version>2.5.0</rexster.version>
   </properties>
 
   <dependencies>
@@ -54,6 +55,19 @@
       <groupId>de.uniko.sebschlicht</groupId>
       <artifactId>socialnet</artifactId>
       <version>${socialnet.version}</version>
+    </dependency>
+    <!-- rexster kibble dependencies -->
+    <dependency>
+      <groupId>com.tinkerpop.rexster</groupId>
+      <artifactId>rexster-core</artifactId>
+      <version>${rexster.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-server</artifactId>
+      <version>1.11</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 
