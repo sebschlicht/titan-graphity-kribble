@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.codehaus.jettison.json.JSONObject;
 
-import com.tinkerpop.blueprints.Graph;
+import com.thinkaurelius.titan.core.TitanGraph;
 import com.tinkerpop.rexster.RexsterResourceContext;
 import com.tinkerpop.rexster.extension.ExtensionDefinition;
 import com.tinkerpop.rexster.extension.ExtensionDescriptor;
@@ -14,7 +14,9 @@ import com.tinkerpop.rexster.extension.ExtensionRequestParameter;
 import com.tinkerpop.rexster.extension.ExtensionResponse;
 import com.tinkerpop.rexster.extension.RexsterContext;
 
-import de.uniko.sebschlicht.titan.socialnet.SocialGraph;
+import de.uniko.sebschlicht.graphity.Graphity;
+import de.uniko.sebschlicht.graphity.exception.UnknownFollowedIdException;
+import de.uniko.sebschlicht.graphity.exception.UnknownFollowingIdException;
 
 public class KibbleRemoveFollowship extends GraphityKibble {
 
@@ -26,17 +28,21 @@ public class KibbleRemoveFollowship extends GraphityKibble {
         ExtensionResponse
         unfollow(
                 @RexsterContext RexsterResourceContext content,
-                @RexsterContext Graph graph,
+                @RexsterContext TitanGraph graph,
                 @ExtensionRequestParameter(
-                        name = "idFollowing",
+                        name = "following",
                         description = "identifier of the user following") String idFollowing,
                 @ExtensionRequestParameter(
-                        name = "idFollowed",
+                        name = "followed",
                         description = "identifier of the user followed") String idFollowed) {
-        SocialGraph socialGraph = getSocialGraph(graph);
+        Graphity graphity = getGraphityInstance(graph);
         Map<String, String> map = new HashMap<String, String>();
-        map.put(KEY_RESPONSE_VALUE, String.valueOf(socialGraph
-                .removeFollowship(idFollowing, idFollowed)));
-        return ExtensionResponse.ok(new JSONObject(map));
+        try {
+            map.put(KEY_RESPONSE_VALUE, String.valueOf(graphity
+                    .removeFollowship(idFollowing, idFollowed)));
+            return ExtensionResponse.ok(new JSONObject(map));
+        } catch (UnknownFollowingIdException | UnknownFollowedIdException e) {
+            return ExtensionResponse.error(e);
+        }
     }
 }

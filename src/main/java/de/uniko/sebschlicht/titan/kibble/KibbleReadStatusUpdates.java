@@ -3,6 +3,7 @@ package de.uniko.sebschlicht.titan.kibble;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.thinkaurelius.titan.core.TitanGraph;
@@ -15,32 +16,30 @@ import com.tinkerpop.rexster.extension.ExtensionResponse;
 import com.tinkerpop.rexster.extension.RexsterContext;
 
 import de.uniko.sebschlicht.graphity.Graphity;
-import de.uniko.sebschlicht.graphity.exception.IllegalUserIdException;
+import de.uniko.sebschlicht.graphity.exception.UnknownReaderIdException;
 
-public class KibbleAddStatusUpdate extends GraphityKibble {
+public class KibbleReadStatusUpdates extends GraphityKibble {
 
     @ExtensionDefinition(
             extensionPoint = ExtensionPoint.GRAPH)
     @ExtensionDescriptor(
             description = "Adds a status update for an user.")
-    public
-        ExtensionResponse
-        post(
-                @RexsterContext RexsterResourceContext context,
-                @RexsterContext TitanGraph graph,
-                @ExtensionRequestParameter(
-                        name = "author",
-                        description = "identifier of the status update author") String idAuthor,
-                @ExtensionRequestParameter(
-                        name = "message",
-                        description = "status update content") String message) {
+    public ExtensionResponse feeds(
+            @RexsterContext RexsterResourceContext context,
+            @RexsterContext TitanGraph graph,
+            @ExtensionRequestParameter(
+                    name = "reader",
+                    description = "identifier of the reader") String idReader) {
         Graphity graphity = getGraphityInstance(graph);
-        Map<String, String> map = new HashMap<String, String>();
+
         try {
-            long idStatusUpdate = graphity.addStatusUpdate(idAuthor, message);
-            map.put(KEY_RESPONSE_VALUE, String.valueOf(idStatusUpdate));
+            JSONObject jsonObject =
+                    new JSONObject(graphity.readStatusUpdates(idReader, 15)
+                            .toString());
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put(KEY_RESPONSE_VALUE, jsonObject);
             return ExtensionResponse.ok(new JSONObject(map));
-        } catch (IllegalUserIdException e) {
+        } catch (UnknownReaderIdException | JSONException e) {
             return ExtensionResponse.error(e);
         }
     }

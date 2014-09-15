@@ -2,9 +2,9 @@ package de.uniko.sebschlicht.titan.graphity;
 
 import java.util.TreeSet;
 
+import com.thinkaurelius.titan.core.TitanGraph;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 
 import de.uniko.sebschlicht.socialnet.StatusUpdate;
@@ -17,10 +17,10 @@ import de.uniko.sebschlicht.titan.socialnet.model.StatusUpdateProxy;
 import de.uniko.sebschlicht.titan.socialnet.model.UserPostIterator;
 import de.uniko.sebschlicht.titan.socialnet.model.UserProxy;
 
-public class WriteOptimizedGraphity extends Graphity {
+public class WriteOptimizedGraphity extends TitanGraphity {
 
     public WriteOptimizedGraphity(
-            Graph graphDb) {
+            TitanGraph graphDb) {
         super(graphDb);
     }
 

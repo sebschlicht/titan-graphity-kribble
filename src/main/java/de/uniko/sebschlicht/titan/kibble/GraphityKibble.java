@@ -3,32 +3,32 @@ package de.uniko.sebschlicht.titan.kibble;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.tinkerpop.blueprints.Graph;
+import com.thinkaurelius.titan.core.TitanGraph;
 import com.tinkerpop.rexster.extension.AbstractRexsterExtension;
 
+import de.uniko.sebschlicht.titan.graphity.TitanGraphity;
 import de.uniko.sebschlicht.titan.graphity.WriteOptimizedGraphity;
-import de.uniko.sebschlicht.titan.socialnet.SocialGraph;
 
 public abstract class GraphityKibble extends AbstractRexsterExtension {
 
     protected static final String KEY_RESPONSE_VALUE = "responseValue";
 
-    private static Map<Graph, SocialGraph> SOCIAL_GRAPHS;
+    private static Map<TitanGraph, TitanGraphity> GRAPHITY_INSTANCES;
     static {
-        SOCIAL_GRAPHS = new HashMap<Graph, SocialGraph>();
+        GRAPHITY_INSTANCES = new HashMap<TitanGraph, TitanGraphity>();
     }
 
-    protected SocialGraph socialGraph;
+    protected TitanGraphity graphity;
 
-    protected SocialGraph getSocialGraph(Graph graph) {
-        if (socialGraph != null) {
-            return socialGraph;
+    protected TitanGraphity getGraphityInstance(TitanGraph graph) {
+        if (graphity != null) {
+            return graphity;
         }
-        SocialGraph socialGraph = SOCIAL_GRAPHS.get(graph);
-        if (socialGraph == null) {
-            socialGraph = new WriteOptimizedGraphity(graph);
-            SOCIAL_GRAPHS.put(graph, socialGraph);
+        TitanGraphity graphity = GRAPHITY_INSTANCES.get(graph);
+        if (graphity == null) {
+            graphity = new WriteOptimizedGraphity(graph);
+            GRAPHITY_INSTANCES.put(graph, graphity);
         }
-        return socialGraph;
+        return graphity;
     }
 }
