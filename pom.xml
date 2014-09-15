@@ -143,6 +143,29 @@
           </execution>
         </executions>
       </plugin>
+      
+      <!-- pack JAR with all dependencies -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <finalName>uber-${artifactId}-${version}</finalName>
+          <artifactSet>
+            <includes>
+              <include>de.metalcon:*</include>
+              <include>de.uniko.sebschlicht:*</include>
+            </includes>
+          </artifactSet>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>
