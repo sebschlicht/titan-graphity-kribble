@@ -2,9 +2,9 @@ package de.uniko.sebschlicht.titan.socialnet;
 
 public enum EdgeType {
 
-    FOLLOWS("follows"),
+    FOLLOWS("e_follows"),
 
-    PUBLISHED("published");
+    PUBLISHED("e_published");
 
     protected String label;
 

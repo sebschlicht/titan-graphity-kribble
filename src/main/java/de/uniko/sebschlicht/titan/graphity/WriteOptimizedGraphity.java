@@ -11,7 +11,6 @@ import de.uniko.sebschlicht.socialnet.StatusUpdate;
 import de.uniko.sebschlicht.socialnet.StatusUpdateList;
 import de.uniko.sebschlicht.titan.Walker;
 import de.uniko.sebschlicht.titan.socialnet.EdgeType;
-import de.uniko.sebschlicht.titan.socialnet.VertexType;
 import de.uniko.sebschlicht.titan.socialnet.model.PostIteratorComparator;
 import de.uniko.sebschlicht.titan.socialnet.model.StatusUpdateProxy;
 import de.uniko.sebschlicht.titan.socialnet.model.UserPostIterator;
@@ -68,7 +67,6 @@ public class WriteOptimizedGraphity extends TitanGraphity {
 
         // create new status update vertex and fill via proxy
         Vertex crrUpdate = graphDb.addVertex(null);
-        crrUpdate.setProperty("label", VertexType.UPDATE.getLabel());
         StatusUpdateProxy pStatusUpdate = new StatusUpdateProxy(crrUpdate);
         //TODO handle service overload
         pStatusUpdate.init();
