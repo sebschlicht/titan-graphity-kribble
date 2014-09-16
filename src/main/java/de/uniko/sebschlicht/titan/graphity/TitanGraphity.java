@@ -16,7 +16,6 @@ import de.uniko.sebschlicht.graphity.exception.UnknownReaderIdException;
 import de.uniko.sebschlicht.socialnet.StatusUpdate;
 import de.uniko.sebschlicht.socialnet.StatusUpdateList;
 import de.uniko.sebschlicht.titan.socialnet.EdgeType;
-import de.uniko.sebschlicht.titan.socialnet.model.SocialItemProxy;
 import de.uniko.sebschlicht.titan.socialnet.model.StatusUpdateProxy;
 import de.uniko.sebschlicht.titan.socialnet.model.UserProxy;
 
@@ -66,8 +65,6 @@ public abstract class TitanGraphity extends Graphity {
                 .multiplicity(Multiplicity.MULTI).make();
 
         // create vertex properties and indices
-        mgmt.makePropertyKey(SocialItemProxy.PROP_IDENTIFIER)
-                .dataType(Long.class).make();
         mgmt.makePropertyKey(StatusUpdateProxy.PROP_PUBLISHED)
                 .dataType(Long.class).make();
         mgmt.makePropertyKey(StatusUpdateProxy.PROP_MESSAGE)
@@ -79,6 +76,7 @@ public abstract class TitanGraphity extends Graphity {
             PropertyKey name =
                     mgmt.makePropertyKey(UserProxy.PROP_IDENTIFIER)
                             .dataType(String.class).make();
+            //TODO how to limit index to certain vertex type?
             userIndex =
                     mgmt.buildIndex(INDEX_USER_ID_NAME, Vertex.class)
                             .addKey(name).unique().buildCompositeIndex();
