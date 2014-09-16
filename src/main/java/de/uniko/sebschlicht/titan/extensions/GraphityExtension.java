@@ -29,6 +29,7 @@ public abstract class GraphityExtension extends AbstractRexsterExtension {
         graphity = GRAPHITY_INSTANCES.get(graph);
         if (graphity == null) {
             graphity = new WriteOptimizedGraphity(graph);
+            graphity.init();
             GRAPHITY_INSTANCES.put(graph, graphity);
         }
         return graphity;
