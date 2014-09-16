@@ -75,7 +75,7 @@ public abstract class TitanGraphity extends Graphity {
         if (userIndex == null) {
             PropertyKey name =
                     mgmt.makePropertyKey(UserProxy.PROP_IDENTIFIER)
-                            .dataType(String.class).make();
+                            .dataType(Long.class).make();
             //TODO how to limit index to certain vertex type?
             userIndex =
                     mgmt.buildIndex(INDEX_USER_ID_NAME, Vertex.class)

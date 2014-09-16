@@ -3,7 +3,7 @@ package de.uniko.sebschlicht.titan.extensions;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.thinkaurelius.titan.core.TitanGraph;
@@ -19,6 +19,7 @@ import com.tinkerpop.rexster.extension.RexsterContext;
 
 import de.uniko.sebschlicht.graphity.Graphity;
 import de.uniko.sebschlicht.graphity.exception.UnknownReaderIdException;
+import de.uniko.sebschlicht.socialnet.StatusUpdateList;
 
 @ExtensionNaming(
         namespace = GraphityExtension.EXT_NAMESPACE,
@@ -38,13 +39,13 @@ public class ReadStatusUpdatesExtension extends GraphityExtension {
         Graphity graphity = getGraphityInstance((TitanGraph) graph);
 
         try {
-            JSONObject jsonObject =
-                    new JSONObject(graphity.readStatusUpdates(idReader, 15)
-                            .toString());
+            StatusUpdateList statusUpdates =
+                    graphity.readStatusUpdates(idReader, 15);
+            JSONArray jaStatusUpdates = new JSONArray(statusUpdates.getList());
             Map<String, Object> map = new HashMap<String, Object>();
-            map.put(KEY_RESPONSE_VALUE, jsonObject);
+            map.put(KEY_RESPONSE_VALUE, jaStatusUpdates);
             return ExtensionResponse.ok(new JSONObject(map));
-        } catch (UnknownReaderIdException | JSONException e) {
+        } catch (UnknownReaderIdException e) {
             return ExtensionResponse.error(e);
         }
     }
