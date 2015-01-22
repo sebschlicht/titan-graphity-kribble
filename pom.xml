@@ -31,7 +31,7 @@
     <!-- dependency versions: production -->
     <titan.version>0.5.0</titan.version>
     <metalcon.muid>0.4.2</metalcon.muid>
-    <socialnet.version>0.0.1-SNAPSHOT</socialnet.version>
+    <socialnet.version>0.1.2-SNAPSHOT</socialnet.version>
     <rexster.version>2.5.0</rexster.version>
   </properties>
 
@@ -162,6 +162,7 @@
             <includes>
               <include>de.metalcon:*</include>
               <include>de.uniko.sebschlicht:*</include>
+              <include>com.googlecode.json-simple:json-simple</include>
             </includes>
           </artifactSet>
         </configuration>

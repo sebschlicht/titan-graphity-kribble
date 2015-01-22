@@ -1,9 +1,12 @@
 package de.uniko.sebschlicht.titan.socialnet.model;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.tinkerpop.blueprints.Vertex;
 
 import de.metalcon.domain.Muid;
 import de.metalcon.domain.UidType;
+import de.metalcon.domain.helper.UnknownMuidException;
 import de.metalcon.exceptions.ServiceOverloadedException;
 import de.uniko.sebschlicht.socialnet.StatusUpdate;
 
@@ -35,12 +38,8 @@ public class StatusUpdateProxy extends SocialItemProxy {
     }
 
     public boolean init() {
-        try {
-            setIdentifier(Muid.create(UidType.DISC).getValue());
-            return true;
-        } catch (ServiceOverloadedException e) {
-            return false;
-        }
+        setIdentifier(generateStatusUpdateIdentifier());
+        return true;
     }
 
     public void setAuthor(UserProxy pAuthor) {
@@ -74,5 +73,22 @@ public class StatusUpdateProxy extends SocialItemProxy {
     public StatusUpdate getStatusUpdate() {
         return new StatusUpdate(String.valueOf(pAuthor.getIdentifier()),
                 getPublished(), getMessage());
+    }
+
+    protected static final AtomicInteger NEXT_TYPE = new AtomicInteger(0);
+
+    protected static long generateStatusUpdateIdentifier() {
+        int muidType = NEXT_TYPE.getAndIncrement();
+        if (muidType > 13) {
+            NEXT_TYPE.set(0);
+            muidType = NEXT_TYPE.getAndIncrement();
+        }
+        try {
+            return Muid.create(UidType.parseShort((short) muidType)).getValue();
+        } catch (UnknownMuidException e) {
+            return generateStatusUpdateIdentifier();
+        } catch (ServiceOverloadedException e) {
+            return generateStatusUpdateIdentifier();
+        }
     }
 }

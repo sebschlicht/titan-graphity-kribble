@@ -2,7 +2,6 @@ package de.uniko.sebschlicht.titan.graphity;
 
 import com.thinkaurelius.titan.core.Multiplicity;
 import com.thinkaurelius.titan.core.PropertyKey;
-import com.thinkaurelius.titan.core.TitanException;
 import com.thinkaurelius.titan.core.TitanGraph;
 import com.thinkaurelius.titan.core.schema.TitanGraphIndex;
 import com.thinkaurelius.titan.core.schema.TitanManagement;
@@ -82,6 +81,13 @@ public abstract class TitanGraphity extends Graphity {
                             .addKey(name).unique().buildCompositeIndex();
             mgmt.commit();
         }
+
+        mgmt = graphDb.getManagementSystem();
+        if (!mgmt.containsGraphIndex(INDEX_USER_ID_NAME)) {
+            throw new IllegalStateException(
+                    "waiting for user index to go online.");
+        }
+        mgmt.rollback();
     }
 
     /**
@@ -92,22 +98,18 @@ public abstract class TitanGraphity extends Graphity {
      * @return user vertex
      * @throws IllegalUserIdException
      *             if the user identifier is invalid
-     * @throws IllegalStateException
-     *             if the user identifier is already in use
      */
     public Vertex createUser(String userIdentifier)
             throws IllegalUserIdException {
+        if (userIdentifier == null) {
+            throw new IllegalUserIdException(userIdentifier);
+        }
         try {
             long idUser = Long.valueOf(userIdentifier);
             if (idUser > 0) {
                 Vertex vUser = graphDb.addVertex(null);
-                try {
-                    vUser.setProperty(UserProxy.PROP_IDENTIFIER, userIdentifier);
-                    return vUser;
-                } catch (TitanException e) {
-                    //TODO is this the correct exception/even correct place? docs missing that point!
-                    throw new IllegalStateException();
-                }
+                vUser.setProperty(UserProxy.PROP_IDENTIFIER, userIdentifier);
+                return vUser;
             }
         } catch (NumberFormatException e) {
             // exception gets thrown below
@@ -123,8 +125,14 @@ public abstract class TitanGraphity extends Graphity {
      * @return user node - if the user is existing in social network graph<br>
      *         <b>null</b> - if there is no vertex representing the user
      *         specified
+     * @throws IllegalUserIdException
+     *             if the user identifier is invalid
      */
-    protected Vertex findUser(String userIdentifier) {
+    protected Vertex findUser(String userIdentifier)
+            throws IllegalUserIdException {
+        if (userIdentifier == null) {
+            throw new IllegalUserIdException(userIdentifier);
+        }
         Iterable<Vertex> vUsers =
                 graphDb.getVertices(UserProxy.PROP_IDENTIFIER, userIdentifier);
         for (Vertex vUser : vUsers) {
@@ -200,7 +208,8 @@ public abstract class TitanGraphity extends Graphity {
 
     @Override
     public boolean removeFollowship(String idFollowing, String idFollowed)
-            throws UnknownFollowingIdException, UnknownFollowedIdException {
+            throws UnknownFollowingIdException, UnknownFollowedIdException,
+            IllegalUserIdException {
         try {
             Vertex vFollowing = findUser(idFollowing);
             if (vFollowing == null) {
@@ -274,7 +283,8 @@ public abstract class TitanGraphity extends Graphity {
     @Override
     public StatusUpdateList readStatusUpdates(
             String idReader,
-            int numStatusUpdates) throws UnknownReaderIdException {
+            int numStatusUpdates) throws UnknownReaderIdException,
+            IllegalUserIdException {
         Vertex vReader = findUser(idReader);
         if (vReader != null) {
             return readStatusUpdates(vReader, numStatusUpdates);

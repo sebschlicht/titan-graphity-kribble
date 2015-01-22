@@ -1,5 +1,7 @@
 package de.uniko.sebschlicht.titan.extensions;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,15 +41,22 @@ public class AddFollowshipExtension extends GraphityExtension {
                 @ExtensionRequestParameter(
                         name = "followed",
                         description = "identifier of the user followed") String idFollowed) {
-        Graphity graphity = getGraphityInstance((TitanGraph) graph);
-        Map<String, String> map = new HashMap<String, String>();
         try {
-            boolean followshipAdded =
-                    graphity.addFollowship(idFollowing, idFollowed);
-            map.put(KEY_RESPONSE_VALUE, String.valueOf(followshipAdded));
-            return ExtensionResponse.ok(new JSONObject(map));
-        } catch (IllegalUserIdException e) {
-            return ExtensionResponse.error(e);
+            Graphity graphity = getGraphityInstance((TitanGraph) graph);
+            Map<String, String> map = new HashMap<String, String>();
+            try {
+                boolean followshipAdded =
+                        graphity.addFollowship(idFollowing, idFollowed);
+                map.put(KEY_RESPONSE_VALUE, String.valueOf(followshipAdded));
+                return ExtensionResponse.ok(new JSONObject(map));
+            } catch (IllegalUserIdException e) {
+                return ExtensionResponse.error(e);
+            }
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            return ExtensionResponse.error(sw.toString());
         }
     }
 }
