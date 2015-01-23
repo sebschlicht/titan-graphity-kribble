@@ -42,16 +42,27 @@ public class RemoveFollowshipExtension extends GraphityExtension {
                 @ExtensionRequestParameter(
                         name = "followed",
                         description = "identifier of the user followed") String idFollowed) {
+        Graphity graphity = getGraphityInstance((TitanGraph) graph);
+        Map<String, String> map = new HashMap<String, String>();
+
+        int numRetries = 0;
         try {
-            Graphity graphity = getGraphityInstance((TitanGraph) graph);
-            Map<String, String> map = new HashMap<String, String>();
-            try {
-                map.put(KEY_RESPONSE_VALUE, String.valueOf(graphity
-                        .removeFollowship(idFollowing, idFollowed)));
-                return ExtensionResponse.ok(new JSONObject(map));
-            } catch (UnknownFollowingIdException | UnknownFollowedIdException e) {
-                return ExtensionResponse.error(e);
-            }
+            //TODO: continue to retry until time x has passed
+            do {
+                try {
+                    map.put(KEY_RESPONSE_VALUE, String.valueOf(graphity
+                            .removeFollowship(idFollowing, idFollowed)));
+                    return ExtensionResponse.ok(new JSONObject(map));
+                } catch (UnknownFollowingIdException
+                        | UnknownFollowedIdException e) {
+                    map.put(KEY_RESPONSE_VALUE, String.valueOf(false));
+                    return ExtensionResponse.ok(new JSONObject(map));
+                } catch (Exception e) {
+                    if (numRetries++ >= NUM_MAX_RETRIES) {
+                        throw e;
+                    }
+                }
+            } while (true);
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);

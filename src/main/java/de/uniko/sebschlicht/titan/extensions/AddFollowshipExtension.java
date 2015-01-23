@@ -41,17 +41,26 @@ public class AddFollowshipExtension extends GraphityExtension {
                 @ExtensionRequestParameter(
                         name = "followed",
                         description = "identifier of the user followed") String idFollowed) {
+        Graphity graphity = getGraphityInstance((TitanGraph) graph);
+        Map<String, String> map = new HashMap<String, String>();
+
+        int numRetries = 0;
         try {
-            Graphity graphity = getGraphityInstance((TitanGraph) graph);
-            Map<String, String> map = new HashMap<String, String>();
-            try {
-                boolean followshipAdded =
-                        graphity.addFollowship(idFollowing, idFollowed);
-                map.put(KEY_RESPONSE_VALUE, String.valueOf(followshipAdded));
-                return ExtensionResponse.ok(new JSONObject(map));
-            } catch (IllegalUserIdException e) {
-                return ExtensionResponse.error(e);
-            }
+            //TODO: continue to retry until time x has passed
+            do {
+                try {
+                    boolean followshipAdded =
+                            graphity.addFollowship(idFollowing, idFollowed);
+                    map.put(KEY_RESPONSE_VALUE, String.valueOf(followshipAdded));
+                    return ExtensionResponse.ok(new JSONObject(map));
+                } catch (IllegalUserIdException e) {
+                    return ExtensionResponse.error(e);
+                } catch (Exception e) {
+                    if (numRetries++ >= NUM_MAX_RETRIES) {
+                        throw e;
+                    }
+                }
+            } while (true);
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);

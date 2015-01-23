@@ -1,7 +1,5 @@
 package de.uniko.sebschlicht.titan.graphity;
 
-import com.thinkaurelius.titan.core.Multiplicity;
-import com.thinkaurelius.titan.core.PropertyKey;
 import com.thinkaurelius.titan.core.TitanGraph;
 import com.thinkaurelius.titan.core.schema.TitanGraphIndex;
 import com.thinkaurelius.titan.core.schema.TitanManagement;
@@ -14,8 +12,6 @@ import de.uniko.sebschlicht.graphity.exception.UnknownFollowingIdException;
 import de.uniko.sebschlicht.graphity.exception.UnknownReaderIdException;
 import de.uniko.sebschlicht.socialnet.StatusUpdate;
 import de.uniko.sebschlicht.socialnet.StatusUpdateList;
-import de.uniko.sebschlicht.titan.socialnet.EdgeType;
-import de.uniko.sebschlicht.titan.socialnet.model.StatusUpdateProxy;
 import de.uniko.sebschlicht.titan.socialnet.model.UserProxy;
 
 /**
@@ -57,36 +53,36 @@ public abstract class TitanGraphity extends Graphity {
     public void init() {
         TitanManagement mgmt = graphDb.getManagementSystem();
 
-        // create edge labels
-        mgmt.makeEdgeLabel(EdgeType.PUBLISHED.getLabel())
-                .multiplicity(Multiplicity.SIMPLE).make();
-        mgmt.makeEdgeLabel(EdgeType.FOLLOWS.getLabel())
-                .multiplicity(Multiplicity.MULTI).make();
-
-        // create vertex properties and indices
-        mgmt.makePropertyKey(StatusUpdateProxy.PROP_PUBLISHED)
-                .dataType(Long.class).make();
-        mgmt.makePropertyKey(StatusUpdateProxy.PROP_MESSAGE)
-                .dataType(String.class).make();
+        /**
+         * Maybe this must not be done here when using eventually-consistent
+         * storage backend.
+         * */
+        //          // create edge labels
+        //          mgmt.makeEdgeLabel(EdgeType.PUBLISHED.getLabel())
+        //          .multiplicity(Multiplicity.SIMPLE).make();
+        //          mgmt.makeEdgeLabel(EdgeType.FOLLOWS.getLabel())
+        //          .multiplicity(Multiplicity.MULTI).make();
+        //          
+        //          // create vertex properties and indices
+        //          mgmt.makePropertyKey(StatusUpdateProxy.PROP_PUBLISHED)
+        //          .dataType(Long.class).make();
+        //          mgmt.makePropertyKey(StatusUpdateProxy.PROP_MESSAGE)
+        //          .dataType(String.class).make();
 
         userIndex = mgmt.getGraphIndex(INDEX_USER_ID_NAME);
         //TODO will index ever exist on startup?
         if (userIndex == null) {
-            PropertyKey name =
-                    mgmt.makePropertyKey(UserProxy.PROP_IDENTIFIER)
-                            .dataType(Long.class).make();
-            //TODO how to limit index to certain vertex type?
-            userIndex =
-                    mgmt.buildIndex(INDEX_USER_ID_NAME, Vertex.class)
-                            .addKey(name).unique().buildCompositeIndex();
-            mgmt.commit();
+            throw new IllegalStateException("index offline");
+            //            PropertyKey name =
+            //                    mgmt.makePropertyKey(UserProxy.PROP_IDENTIFIER)
+            //                            .dataType(Long.class).make();
+            //            //TODO how to limit index to certain vertex type?
+            //            userIndex =
+            //                    mgmt.buildIndex(INDEX_USER_ID_NAME, Vertex.class)
+            //                            .addKey(name).unique().buildCompositeIndex();
+            //            mgmt.commit();
         }
-
-        mgmt = graphDb.getManagementSystem();
-        if (!mgmt.containsGraphIndex(INDEX_USER_ID_NAME)) {
-            throw new IllegalStateException(
-                    "waiting for user index to go online.");
-        }
+        // we did not change anything
         mgmt.rollback();
     }
 

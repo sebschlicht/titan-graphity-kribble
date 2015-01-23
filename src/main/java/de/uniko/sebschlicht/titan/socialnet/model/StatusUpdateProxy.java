@@ -7,6 +7,7 @@ import com.tinkerpop.blueprints.Vertex;
 import de.metalcon.domain.Muid;
 import de.metalcon.domain.UidType;
 import de.metalcon.domain.helper.UnknownMuidException;
+import de.metalcon.exceptions.MetalconRuntimeException;
 import de.metalcon.exceptions.ServiceOverloadedException;
 import de.uniko.sebschlicht.socialnet.StatusUpdate;
 
@@ -79,15 +80,19 @@ public class StatusUpdateProxy extends SocialItemProxy {
 
     protected static long generateStatusUpdateIdentifier() {
         int muidType = NEXT_TYPE.getAndIncrement();
-        if (muidType > 13) {
-            NEXT_TYPE.set(0);
+        while (muidType == 10 || muidType > 13) {
+            if (muidType > 13) {
+                NEXT_TYPE.set(0);
+            }
             muidType = NEXT_TYPE.getAndIncrement();
         }
         try {
             return Muid.create(UidType.parseShort((short) muidType)).getValue();
-        } catch (UnknownMuidException e) {
+        } catch (UnknownMuidException e) {// should not happen, but hey...
             return generateStatusUpdateIdentifier();
-        } catch (ServiceOverloadedException e) {
+        } catch (ServiceOverloadedException e) {// we are too fast (>12k/s)
+            return generateStatusUpdateIdentifier();
+        } catch (MetalconRuntimeException e) {// muidType == 10 -> is URL
             return generateStatusUpdateIdentifier();
         }
     }

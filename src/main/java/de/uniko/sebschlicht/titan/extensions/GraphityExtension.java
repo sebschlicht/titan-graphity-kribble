@@ -1,8 +1,5 @@
 package de.uniko.sebschlicht.titan.extensions;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.thinkaurelius.titan.core.TitanGraph;
 import com.tinkerpop.rexster.extension.AbstractRexsterExtension;
 
@@ -15,10 +12,7 @@ public abstract class GraphityExtension extends AbstractRexsterExtension {
 
     protected static final String EXT_NAMESPACE = "graphity";
 
-    private static Map<TitanGraph, TitanGraphity> GRAPHITY_INSTANCES;
-    static {
-        GRAPHITY_INSTANCES = new HashMap<TitanGraph, TitanGraphity>();
-    }
+    protected static final int NUM_MAX_RETRIES = 10;
 
     protected TitanGraphity graphity;
 
@@ -26,12 +20,8 @@ public abstract class GraphityExtension extends AbstractRexsterExtension {
         if (graphity != null) {
             return graphity;
         }
-        graphity = GRAPHITY_INSTANCES.get(graph);
-        if (graphity == null) {
-            graphity = new WriteOptimizedGraphity(graph);
-            graphity.init();
-            GRAPHITY_INSTANCES.put(graph, graphity);
-        }
+        graphity = new WriteOptimizedGraphity(graph);
+        graphity.init();
         return graphity;
     }
 }
