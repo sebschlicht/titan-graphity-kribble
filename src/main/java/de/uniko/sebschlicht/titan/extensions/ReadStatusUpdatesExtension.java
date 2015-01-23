@@ -53,6 +53,7 @@ public class ReadStatusUpdatesExtension extends GraphityExtension {
                 map.put(KEY_RESPONSE_VALUE, jaStatusUpdates);
                 return ExtensionResponse.ok(new JSONObject(map));
             } catch (UnknownReaderIdException e) {
+                //TODO: implement client to catch this because it is no error in benchmark context
                 return ExtensionResponse.error(e);
             }
         } catch (Exception e) {

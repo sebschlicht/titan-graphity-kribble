@@ -41,11 +41,11 @@ public class AddFollowshipExtension extends GraphityExtension {
                 @ExtensionRequestParameter(
                         name = "followed",
                         description = "identifier of the user followed") String idFollowed) {
-        Graphity graphity = getGraphityInstance((TitanGraph) graph);
-        Map<String, String> map = new HashMap<String, String>();
-
-        int numRetries = 0;
         try {
+            Graphity graphity = getGraphityInstance((TitanGraph) graph);
+            Map<String, String> map = new HashMap<String, String>();
+
+            int numRetries = 0;
             //TODO: continue to retry until time x has passed
             do {
                 try {

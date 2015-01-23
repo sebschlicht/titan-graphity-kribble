@@ -41,11 +41,11 @@ public class AddStatusUpdateExtension extends GraphityExtension {
                 @ExtensionRequestParameter(
                         name = "message",
                         description = "status update content") String message) {
-        Graphity graphity = getGraphityInstance((TitanGraph) graph);
-        Map<String, String> map = new HashMap<String, String>();
-
-        int numRetries = 0;
         try {
+            Graphity graphity = getGraphityInstance((TitanGraph) graph);
+            Map<String, String> map = new HashMap<String, String>();
+
+            int numRetries = 0;
             //TODO: continue to retry until time x has passed
             do {
                 try {
