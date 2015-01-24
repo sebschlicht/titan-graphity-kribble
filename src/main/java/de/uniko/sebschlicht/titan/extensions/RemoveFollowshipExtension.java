@@ -24,8 +24,14 @@ import de.uniko.sebschlicht.graphity.exception.UnknownFollowingIdException;
 
 @ExtensionNaming(
         namespace = GraphityExtension.EXT_NAMESPACE,
-        name = "unfollow")
+        name = RemoveFollowshipExtension.EXT_NAME)
 public class RemoveFollowshipExtension extends GraphityExtension {
+
+    protected static final String EXT_NAME = "unfollow";
+
+    protected RemoveFollowshipExtension() {
+        super(EXT_NAME);
+    }
 
     @ExtensionDefinition(
             extensionPoint = ExtensionPoint.GRAPH)
@@ -34,7 +40,7 @@ public class RemoveFollowshipExtension extends GraphityExtension {
     public
         ExtensionResponse
         unfollow(
-                @RexsterContext RexsterResourceContext content,
+                @RexsterContext RexsterResourceContext context,
                 @RexsterContext Graph graph,
                 @ExtensionRequestParameter(
                         name = "following",
@@ -43,7 +49,8 @@ public class RemoveFollowshipExtension extends GraphityExtension {
                         name = "followed",
                         description = "identifier of the user followed") String idFollowed) {
         try {
-            Graphity graphity = getGraphityInstance((TitanGraph) graph);
+            Graphity graphity =
+                    getGraphityInstance(context, (TitanGraph) graph);
             Map<String, String> map = new HashMap<String, String>();
 
             int numRetries = 0;

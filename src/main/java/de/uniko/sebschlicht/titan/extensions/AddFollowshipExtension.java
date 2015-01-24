@@ -23,8 +23,14 @@ import de.uniko.sebschlicht.graphity.exception.IllegalUserIdException;
 
 @ExtensionNaming(
         namespace = GraphityExtension.EXT_NAMESPACE,
-        name = "follow")
+        name = AddFollowshipExtension.EXT_NAME)
 public class AddFollowshipExtension extends GraphityExtension {
+
+    protected static final String EXT_NAME = "follow";
+
+    protected AddFollowshipExtension() {
+        super(EXT_NAME);
+    }
 
     @ExtensionDefinition(
             extensionPoint = ExtensionPoint.GRAPH)
@@ -42,7 +48,8 @@ public class AddFollowshipExtension extends GraphityExtension {
                         name = "followed",
                         description = "identifier of the user followed") String idFollowed) {
         try {
-            Graphity graphity = getGraphityInstance((TitanGraph) graph);
+            Graphity graphity =
+                    getGraphityInstance(context, (TitanGraph) graph);
             Map<String, String> map = new HashMap<String, String>();
 
             int numRetries = 0;

@@ -1,15 +1,11 @@
 package de.uniko.sebschlicht.titan.socialnet.model;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.tinkerpop.blueprints.Vertex;
 
-import de.metalcon.domain.Muid;
 import de.metalcon.domain.UidType;
-import de.metalcon.domain.helper.UnknownMuidException;
-import de.metalcon.exceptions.MetalconRuntimeException;
 import de.metalcon.exceptions.ServiceOverloadedException;
 import de.uniko.sebschlicht.socialnet.StatusUpdate;
+import de.uniko.sebschlicht.titan.extensions.GraphityExtension;
 
 public class StatusUpdateProxy extends SocialItemProxy {
 
@@ -39,7 +35,13 @@ public class StatusUpdateProxy extends SocialItemProxy {
     }
 
     public boolean init() {
-        setIdentifier(generateStatusUpdateIdentifier());
+        try {
+            long identifier =
+                    GraphityExtension.generateMuid(UidType.DISC).getValue();
+            setIdentifier(identifier);
+        } catch (ServiceOverloadedException e) {
+            throw new IllegalStateException(e);
+        }
         return true;
     }
 
@@ -74,26 +76,5 @@ public class StatusUpdateProxy extends SocialItemProxy {
     public StatusUpdate getStatusUpdate() {
         return new StatusUpdate(String.valueOf(pAuthor.getIdentifier()),
                 getPublished(), getMessage());
-    }
-
-    protected static final AtomicInteger NEXT_TYPE = new AtomicInteger(0);
-
-    protected static long generateStatusUpdateIdentifier() {
-        int muidType = NEXT_TYPE.getAndIncrement();
-        while (muidType == 10 || muidType > 13) {
-            if (muidType > 13) {
-                NEXT_TYPE.set(0);
-            }
-            muidType = NEXT_TYPE.getAndIncrement();
-        }
-        try {
-            return Muid.create(UidType.parseShort((short) muidType)).getValue();
-        } catch (UnknownMuidException e) {// should not happen, but hey...
-            return generateStatusUpdateIdentifier();
-        } catch (ServiceOverloadedException e) {// we are too fast (>12k/s)
-            return generateStatusUpdateIdentifier();
-        } catch (MetalconRuntimeException e) {// muidType == 10 -> is URL
-            return generateStatusUpdateIdentifier();
-        }
     }
 }

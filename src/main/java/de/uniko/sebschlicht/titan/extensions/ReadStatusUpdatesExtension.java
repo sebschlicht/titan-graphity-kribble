@@ -26,8 +26,14 @@ import de.uniko.sebschlicht.socialnet.StatusUpdateList;
 
 @ExtensionNaming(
         namespace = GraphityExtension.EXT_NAMESPACE,
-        name = "feeds")
+        name = ReadStatusUpdatesExtension.EXT_NAME)
 public class ReadStatusUpdatesExtension extends GraphityExtension {
+
+    protected static final String EXT_NAME = "feeds";
+
+    protected ReadStatusUpdatesExtension() {
+        super(EXT_NAME);
+    }
 
     @ExtensionDefinition(
             extensionPoint = ExtensionPoint.GRAPH)
@@ -40,7 +46,8 @@ public class ReadStatusUpdatesExtension extends GraphityExtension {
                     name = "reader",
                     description = "identifier of the reader") String idReader) {
         try {
-            Graphity graphity = getGraphityInstance((TitanGraph) graph);
+            Graphity graphity =
+                    getGraphityInstance(context, (TitanGraph) graph);
 
             try {
                 StatusUpdateList statusUpdates =

@@ -23,8 +23,14 @@ import de.uniko.sebschlicht.graphity.exception.IllegalUserIdException;
 
 @ExtensionNaming(
         namespace = GraphityExtension.EXT_NAMESPACE,
-        name = "post")
+        name = AddStatusUpdateExtension.EXT_NAME)
 public class AddStatusUpdateExtension extends GraphityExtension {
+
+    protected static final String EXT_NAME = "post";
+
+    protected AddStatusUpdateExtension() {
+        super(EXT_NAME);
+    }
 
     @ExtensionDefinition(
             extensionPoint = ExtensionPoint.GRAPH)
@@ -42,7 +48,8 @@ public class AddStatusUpdateExtension extends GraphityExtension {
                         name = "message",
                         description = "status update content") String message) {
         try {
-            Graphity graphity = getGraphityInstance((TitanGraph) graph);
+            Graphity graphity =
+                    getGraphityInstance(context, (TitanGraph) graph);
             Map<String, String> map = new HashMap<String, String>();
 
             int numRetries = 0;
