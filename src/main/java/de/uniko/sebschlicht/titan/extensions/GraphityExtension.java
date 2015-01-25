@@ -67,6 +67,14 @@ public abstract class GraphityExtension extends AbstractRexsterExtension {
             Map<String, String> map =
                     configuration.tryGetMapFromConfiguration();
             String sId = map.get(KEY_CONF_ID);
+            if (sId == null) {
+                throw new IllegalStateException(
+                        "Rexster \""
+                                + EXT_NAMESPACE
+                                + "\" extension configuration is missing field \""
+                                + KEY_CONF_ID
+                                + "\": Please provide an unique identifier for this node.");
+            }
             byte id = Byte.valueOf(sId);
             setSourceId(id);
         }
