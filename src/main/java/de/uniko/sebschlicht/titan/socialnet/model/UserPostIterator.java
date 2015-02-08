@@ -11,10 +11,24 @@ public class UserPostIterator implements PostIterator {
 
     protected StatusUpdateProxy pCrrStatusUpdate;
 
+    protected Vertex _vReplica;
+
     public UserPostIterator(
             UserProxy pUser) {
         this.pUser = pUser;
         pCrrStatusUpdate = getLastUserPost(pUser);
+    }
+
+    public UserProxy getUser() {
+        return pUser;
+    }
+
+    public void setReplicaVertex(Vertex vReplica) {
+        _vReplica = vReplica;
+    }
+
+    public Vertex getReplicaVertex() {
+        return _vReplica;
     }
 
     protected static StatusUpdateProxy getLastUserPost(UserProxy pUser) {

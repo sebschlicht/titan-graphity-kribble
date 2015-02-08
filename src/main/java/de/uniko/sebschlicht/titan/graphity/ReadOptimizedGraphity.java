@@ -1,5 +1,7 @@
 package de.uniko.sebschlicht.titan.graphity;
 
+import java.util.TreeSet;
+
 import com.thinkaurelius.titan.core.TitanGraph;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
@@ -8,7 +10,9 @@ import de.uniko.sebschlicht.socialnet.StatusUpdate;
 import de.uniko.sebschlicht.socialnet.StatusUpdateList;
 import de.uniko.sebschlicht.titan.Walker;
 import de.uniko.sebschlicht.titan.socialnet.EdgeType;
+import de.uniko.sebschlicht.titan.socialnet.model.PostIteratorComparator;
 import de.uniko.sebschlicht.titan.socialnet.model.StatusUpdateProxy;
+import de.uniko.sebschlicht.titan.socialnet.model.UserPostIterator;
 import de.uniko.sebschlicht.titan.socialnet.model.UserProxy;
 
 public class ReadOptimizedGraphity extends TitanGraphity {
@@ -127,7 +131,7 @@ public class ReadOptimizedGraphity extends TitanGraphity {
      * @param user
      *            user where changes have occurred
      */
-    private void updateEgoNetwork(final Vertex user) {
+    private void updateEgoNetworks(final Vertex user) {
         Vertex followingUser, lastPosterReplica;
         Vertex prevReplica, nextReplica;
         // loop through followers
@@ -196,7 +200,7 @@ public class ReadOptimizedGraphity extends TitanGraphity {
         pAuthor.setLastPostTimestamp(statusUpdate.getPublished());
 
         // update ego networks of status update author followers
-        updateEgoNetwork(vAuthor);
+        updateEgoNetworks(vAuthor);
 
         return pStatusUpdate.getIdentifier();
     }
@@ -205,8 +209,74 @@ public class ReadOptimizedGraphity extends TitanGraphity {
     protected StatusUpdateList readStatusUpdates(
             Vertex vReader,
             int numStatusUpdates) {
-        // TODO Auto-generated method stub
-        return null;
+        StatusUpdateList statusUpdates = new StatusUpdateList();
+        final TreeSet<UserPostIterator> postIterators =
+                new TreeSet<UserPostIterator>(new PostIteratorComparator());
+
+        // load first user by replica
+        UserProxy pCrrUser = null;
+        UserPostIterator userPostIterator;
+        Vertex vReplica =
+                Walker.nextVertex(vReader, EdgeType.GRAPHITY.getLabel());
+        if (vReplica != null) {
+            pCrrUser =
+                    new UserProxy(Walker.nextVertex(vReplica,
+                            EdgeType.REPLICA.getLabel()));
+            userPostIterator = new UserPostIterator(pCrrUser);
+            userPostIterator.setReplicaVertex(vReplica);
+
+            if (userPostIterator.hasNext()) {
+                postIterators.add(userPostIterator);
+            }
+        }
+
+        // handle user queue
+        UserProxy pPrevUser = pCrrUser;
+        while (statusUpdates.size() < numStatusUpdates
+                && !postIterators.isEmpty()) {
+            // add last recent status update
+            userPostIterator = postIterators.pollLast();
+            statusUpdates.add(userPostIterator.next().getStatusUpdate());
+
+            // re-add iterator if not empty
+            if (userPostIterator.hasNext()) {
+                postIterators.add(userPostIterator);
+            }
+
+            // load additional user if necessary
+            if (userPostIterator.getUser() == pPrevUser) {
+                vReplica =
+                        Walker.nextVertex(userPostIterator.getReplicaVertex(),
+                                EdgeType.GRAPHITY.getLabel());
+                // check if additional user existing
+                if (vReplica != null) {
+                    pCrrUser =
+                            new UserProxy(Walker.nextVertex(vReplica,
+                                    EdgeType.REPLICA.getLabel()));
+                    userPostIterator = new UserPostIterator(pCrrUser);
+                    userPostIterator.setReplicaVertex(vReplica);
+                    // check if user has status updates
+                    if (userPostIterator.hasNext()) {
+                        postIterators.add(userPostIterator);
+                        pPrevUser = pCrrUser;
+                    } else {
+                        // further users do not need to be loaded
+                        pPrevUser = null;
+                    }
+                }
+            }
+        }
+
+        //            // access single stream only
+        //            final UserProxy posterNode = new UserProxy(nReader);
+        //            UserPostIterator postIterator = new UserPostIterator(posterNode);
+        //
+        //            while ((statusUpdates.size() < numStatusUpdates)
+        //                    && postIterator.hasNext()) {
+        //                statusUpdates.add(postIterator.next().getStatusUpdate());
+        //            }
+
+        return statusUpdates;
     }
 
     /**
