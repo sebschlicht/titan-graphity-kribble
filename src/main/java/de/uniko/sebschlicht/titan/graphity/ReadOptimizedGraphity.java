@@ -8,6 +8,7 @@ import de.uniko.sebschlicht.socialnet.StatusUpdate;
 import de.uniko.sebschlicht.socialnet.StatusUpdateList;
 import de.uniko.sebschlicht.titan.Walker;
 import de.uniko.sebschlicht.titan.socialnet.EdgeType;
+import de.uniko.sebschlicht.titan.socialnet.model.StatusUpdateProxy;
 import de.uniko.sebschlicht.titan.socialnet.model.UserProxy;
 
 public class ReadOptimizedGraphity extends TitanGraphity {
@@ -120,10 +121,84 @@ public class ReadOptimizedGraphity extends TitanGraphity {
         return true;
     }
 
+    /**
+     * update the ego networks of a user's followers
+     * 
+     * @param user
+     *            user where changes have occurred
+     */
+    private void updateEgoNetwork(final Vertex user) {
+        Vertex followingUser, lastPosterReplica;
+        Vertex prevReplica, nextReplica;
+        // loop through followers
+        for (Vertex followedReplica : user.getVertices(Direction.IN,
+                EdgeType.REPLICA.getLabel())) {
+            // load each replica and the user corresponding
+            followingUser =
+                    Walker.previousVertex(followedReplica,
+                            EdgeType.FOLLOWS.getLabel());
+            // bridge user node
+            prevReplica =
+                    Walker.previousVertex(followedReplica,
+                            EdgeType.GRAPHITY.getLabel());
+            if (!prevReplica.equals(followingUser)) {
+                Walker.removeSingleEdge(followedReplica, Direction.IN,
+                        EdgeType.GRAPHITY.getLabel());
+                nextReplica =
+                        Walker.nextVertex(followedReplica,
+                                EdgeType.GRAPHITY.getLabel());
+                if (nextReplica != null) {
+                    Walker.removeSingleEdge(followedReplica, Direction.OUT,
+                            EdgeType.GRAPHITY.getLabel());
+                    prevReplica.addEdge(EdgeType.GRAPHITY.getLabel(),
+                            nextReplica);
+                }
+            }
+            // insert user's replica at its new position
+            lastPosterReplica =
+                    Walker.nextVertex(followingUser,
+                            EdgeType.GRAPHITY.getLabel());
+            if (!lastPosterReplica.equals(followedReplica)) {
+                Walker.removeSingleEdge(followingUser, Direction.OUT,
+                        EdgeType.GRAPHITY.getLabel());
+                followingUser.addEdge(EdgeType.GRAPHITY.getLabel(),
+                        followedReplica);
+                followedReplica.addEdge(EdgeType.GRAPHITY.getLabel(),
+                        lastPosterReplica);
+            }
+        }
+    }
+
     @Override
     protected long addStatusUpdate(Vertex vAuthor, StatusUpdate statusUpdate) {
-        // TODO Auto-generated method stub
-        return 0;
+        // get last recent status update
+        final Vertex lastUpdate =
+                Walker.nextVertex(vAuthor, EdgeType.PUBLISHED.getLabel());
+
+        // create new status update node and fill via proxy
+        Vertex crrUpdate = graphDb.addVertex(null);
+        StatusUpdateProxy pStatusUpdate = new StatusUpdateProxy(crrUpdate);
+        //TODO handle service overload
+        pStatusUpdate.init();
+        UserProxy pAuthor = new UserProxy(vAuthor);
+        pStatusUpdate.setAuthor(pAuthor);
+        pStatusUpdate.setMessage(statusUpdate.getMessage());
+        pStatusUpdate.setPublished(statusUpdate.getPublished());
+
+        // update references to previous status update (if existing)
+        if (lastUpdate != null) {
+            Walker.removeSingleEdge(vAuthor, Direction.OUT,
+                    EdgeType.PUBLISHED.getLabel());
+            crrUpdate.addEdge(EdgeType.PUBLISHED.getLabel(), lastUpdate);
+        }
+        // add reference from user to current update node
+        vAuthor.addEdge(EdgeType.PUBLISHED.getLabel(), crrUpdate);
+        pAuthor.setLastPostTimestamp(statusUpdate.getPublished());
+
+        // update ego networks of status update author followers
+        updateEgoNetwork(vAuthor);
+
+        return pStatusUpdate.getIdentifier();
     }
 
     @Override
