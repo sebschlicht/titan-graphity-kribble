@@ -70,7 +70,8 @@ public class WriteOptimizedGraphity extends TitanGraphity {
         StatusUpdateProxy pStatusUpdate = new StatusUpdateProxy(crrUpdate);
         //TODO handle service overload
         pStatusUpdate.init();
-        pStatusUpdate.setAuthor(new UserProxy(vAuthor));
+        UserProxy pAuthor = new UserProxy(vAuthor);
+        pStatusUpdate.setAuthor(pAuthor);
         pStatusUpdate.setMessage(statusUpdate.getMessage());
         pStatusUpdate.setPublished(statusUpdate.getPublished());
 
@@ -83,8 +84,7 @@ public class WriteOptimizedGraphity extends TitanGraphity {
 
         // add reference from user to current update node
         vAuthor.addEdge(EdgeType.PUBLISHED.getLabel(), crrUpdate);
-        vAuthor.setProperty(UserProxy.PROP_LAST_STREAM_UDPATE,
-                statusUpdate.getPublished());
+        pAuthor.setLastPostTimestamp(statusUpdate.getPublished());
 
         return pStatusUpdate.getIdentifier();
     }

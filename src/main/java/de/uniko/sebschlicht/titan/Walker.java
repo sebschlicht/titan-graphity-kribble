@@ -31,6 +31,24 @@ public abstract class Walker {
     }
 
     /**
+     * Walks backwards along an edge type to the previous vertex.
+     * 
+     * @param sourceVertex
+     *            vertex to start from
+     * @param edgeLabel
+     *            label of the edge to walk along
+     * @return previous vertex the edge specified directs from<br>
+     *         <b>null</b> - if the start vertex has no such edge directing in
+     */
+    public static Vertex previousVertex(Vertex sourceVertex, String edgeLabel) {
+        for (Vertex destinationNode : sourceVertex.getVertices(Direction.IN,
+                edgeLabel)) {
+            return destinationNode;
+        }
+        return null;
+    }
+
+    /**
      * Removes the first edge matching the given criteria retrieved by
      * <i>getEdges</i>.
      * 
