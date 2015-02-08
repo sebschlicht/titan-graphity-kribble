@@ -63,9 +63,10 @@ public class AddFollowshipExtension extends GraphityExtension {
                 } catch (IllegalUserIdException e) {
                     return ExtensionResponse.error(e);
                 } catch (Exception e) {
-                    if (numRetries++ >= NUM_MAX_RETRIES) {
+                    if (numRetries >= NUM_MAX_RETRIES) {
                         throw e;
                     }
+                    numRetries += 1;
                 }
             } while (true);
         } catch (Exception e) {

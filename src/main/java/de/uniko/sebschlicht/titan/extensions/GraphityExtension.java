@@ -3,6 +3,8 @@ package de.uniko.sebschlicht.titan.extensions;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.log4j.Logger;
+
 import com.thinkaurelius.titan.core.TitanGraph;
 import com.tinkerpop.rexster.RexsterResourceContext;
 import com.tinkerpop.rexster.extension.AbstractRexsterExtension;
@@ -17,13 +19,15 @@ import de.uniko.sebschlicht.titan.graphity.WriteOptimizedGraphity;
 
 public abstract class GraphityExtension extends AbstractRexsterExtension {
 
+    protected static Logger LOG = Logger.getLogger(GraphityExtension.class);
+
     protected static final String KEY_CONF_ID = "sourceId";
 
     protected static final String KEY_RESPONSE_VALUE = "responseValue";
 
     protected static final String EXT_NAMESPACE = "graphity";
 
-    protected static final int NUM_MAX_RETRIES = 10;
+    protected static final int NUM_MAX_RETRIES = 0;
 
     protected static byte SOURCE_ID = 0;
 
@@ -40,20 +44,6 @@ public abstract class GraphityExtension extends AbstractRexsterExtension {
         this.name = name;
     }
 
-    @Override
-    public boolean isConfigurationValid(
-            ExtensionConfiguration extensionConfiguration) {
-        boolean valid = false;
-        if (extensionConfiguration != null) {
-            Map<String, String> map =
-                    extensionConfiguration.tryGetMapFromConfiguration();
-            valid =
-                    map != null && !map.isEmpty()
-                            && map.containsKey(KEY_CONF_ID);
-        }
-        return valid;
-    }
-
     protected TitanGraphity getGraphityInstance(
             RexsterResourceContext context,
             TitanGraph graph) {
@@ -68,6 +58,12 @@ public abstract class GraphityExtension extends AbstractRexsterExtension {
                     configuration.tryGetMapFromConfiguration();
             String sId = map.get(KEY_CONF_ID);
             if (sId == null) {
+                LOG.error("Rexster \""
+                        + EXT_NAMESPACE
+                        + "\" extension configuration is missing field \""
+                        + KEY_CONF_ID
+                        + "\": Please provide an unique identifier for this node. Config is: "
+                        + map);
                 throw new IllegalStateException(
                         "Rexster \""
                                 + EXT_NAMESPACE

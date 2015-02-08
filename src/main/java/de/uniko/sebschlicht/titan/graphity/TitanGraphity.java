@@ -46,6 +46,13 @@ public abstract class TitanGraphity extends Graphity {
     }
 
     /**
+     * @return Titan graph database holding the social network graph
+     */
+    public TitanGraph getGraph() {
+        return graphDb;
+    }
+
+    /**
      * Initializes the social graph instance in order to access and manipulate
      * the social network graph.
      */
@@ -72,7 +79,8 @@ public abstract class TitanGraphity extends Graphity {
         userIndex = mgmt.getGraphIndex(INDEX_USER_ID_NAME);
         //TODO will index ever exist on startup?
         if (userIndex == null) {
-            throw new IllegalStateException("index offline");
+            //TODO will this exception get thrown? does this cause our problems?
+            //throw new IllegalStateException("index offline");
             //            PropertyKey name =
             //                    mgmt.makePropertyKey(UserProxy.PROP_IDENTIFIER)
             //                            .dataType(Long.class).make();
@@ -170,12 +178,21 @@ public abstract class TitanGraphity extends Graphity {
     @Override
     public boolean addFollowship(String idFollowing, String idFollowed)
             throws IllegalUserIdException {
+        return addFollowship(idFollowing, idFollowed, true);
+    }
+
+    public boolean addFollowship(
+            String idFollowing,
+            String idFollowed,
+            boolean autoCommit) throws IllegalUserIdException {
         try {
             //TODO can not create locks manually, but we could force lock via write access
             Vertex vFollowing = loadUser(idFollowing);
             Vertex vFollowed = loadUser(idFollowed);
             if (addFollowship(vFollowing, vFollowed)) {
-                graphDb.commit();
+                if (autoCommit) {
+                    graphDb.commit();
+                }
                 return true;
             }
             // no changes to commit/roll back
@@ -206,6 +223,14 @@ public abstract class TitanGraphity extends Graphity {
     public boolean removeFollowship(String idFollowing, String idFollowed)
             throws UnknownFollowingIdException, UnknownFollowedIdException,
             IllegalUserIdException {
+        return removeFollowship(idFollowing, idFollowed, true);
+    }
+
+    public boolean removeFollowship(
+            String idFollowing,
+            String idFollowed,
+            boolean autoCommit) throws UnknownFollowingIdException,
+            UnknownFollowedIdException, IllegalUserIdException {
         try {
             Vertex vFollowing = findUser(idFollowing);
             if (vFollowing == null) {
@@ -219,7 +244,9 @@ public abstract class TitanGraphity extends Graphity {
             //TODO can not create locks manually, but we could force lock via write access
 
             if (removeFollowship(vFollowing, vFollowed)) {
-                graphDb.commit();
+                if (autoCommit) {
+                    graphDb.commit();
+                }
                 return true;
             }
             // no changes to commit/roll back
@@ -251,12 +278,19 @@ public abstract class TitanGraphity extends Graphity {
     @Override
     public long addStatusUpdate(String idAuthor, String message)
             throws IllegalUserIdException {
+        return addStatusUpdate(idAuthor, message, true);
+    }
+
+    public long addStatusUpdate(
+            String idAuthor,
+            String message,
+            boolean autoCommit) throws IllegalUserIdException {
         Vertex vAuthor = loadUser(idAuthor);
         //TODO can not create locks manually, but we could force lock via write access
         StatusUpdate statusUpdate =
                 new StatusUpdate(idAuthor, System.currentTimeMillis(), message);
         long idStatusUpdate = addStatusUpdate(vAuthor, statusUpdate);
-        if (idStatusUpdate != 0) {
+        if (autoCommit && idStatusUpdate != 0) {
             graphDb.commit();
         }
         // nothing to commit/roll back
