@@ -46,11 +46,13 @@
       <artifactId>titan-cassandra</artifactId>
       <version>${titan.version}</version>
     </dependency>
+    <!-- removed for debugging
     <dependency>
       <groupId>de.metalcon</groupId>
       <artifactId>muid</artifactId>
       <version>${metalcon.muid}</version>
     </dependency>
+    -->
     <dependency>
       <groupId>de.uniko.sebschlicht</groupId>
       <artifactId>socialnet</artifactId>
