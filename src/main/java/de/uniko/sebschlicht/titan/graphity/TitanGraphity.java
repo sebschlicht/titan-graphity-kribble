@@ -39,10 +39,6 @@ public abstract class TitanGraphity extends Graphity {
     public TitanGraphity(
             TitanGraph graphDb) {
         this.graphDb = graphDb;
-        if (graphDb == null) {
-            throw new IllegalStateException(
-                    "Titan graph database not accessible");
-        }
     }
 
     /**

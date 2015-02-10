@@ -23,7 +23,7 @@ import de.uniko.sebschlicht.titan.graphity.TitanGraphity;
 
 @ExtensionNaming(
         namespace = GraphityExtension.EXT_NAMESPACE,
-        name = AddFollowshipExtension.EXT_NAME)
+        name = BootstrapExtension.EXT_NAME)
 public class BootstrapExtension extends GraphityExtension {
 
     protected static final String EXT_NAME = "bootstrap";
