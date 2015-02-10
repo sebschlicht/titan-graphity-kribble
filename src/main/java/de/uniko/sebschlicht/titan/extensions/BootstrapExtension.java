@@ -5,7 +5,7 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.jettison.json.JSONObject;
+import org.codehaus.jettison.json.JSONArray;
 
 import com.thinkaurelius.titan.core.TitanGraph;
 import com.tinkerpop.blueprints.Graph;
@@ -28,12 +28,7 @@ public class BootstrapExtension extends GraphityExtension {
 
     protected static final String EXT_NAME = "bootstrap";
 
-    private static final int BOOTSTRAP_BLOCK_SIZE = 10000;
-
-    protected BootstrapExtension(
-            String name) {
-        super(EXT_NAME);
-    }
+    protected static final int BOOTSTRAP_BLOCK_SIZE = 10000;
 
     @ExtensionDefinition(
             extensionPoint = ExtensionPoint.GRAPH)
@@ -46,8 +41,15 @@ public class BootstrapExtension extends GraphityExtension {
                 @RexsterContext Graph graph,
                 @ExtensionRequestParameter(
                         name = "entries",
-                        description = "Concatenation of the String array representations of the requests that will be bootstrapped.") String[] entries) {
+                        description = "Concatenation of the String array representations of the requests that will be bootstrapped.") String sEntries) {
         try {
+            // parse String to JSON array and convert to String array
+            JSONArray aEntries = new JSONArray(sEntries);
+            String[] entries = new String[aEntries.length()];
+            for (int i = 0; i < entries.length; ++i) {
+                entries[i] = aEntries.getString(i);
+            }
+
             TitanGraphity graphity =
                     getGraphityInstance(context, (TitanGraph) graph);
             TitanGraph graphDb = graphity.getGraph();
@@ -79,7 +81,7 @@ public class BootstrapExtension extends GraphityExtension {
 
             Map<String, String> map = new HashMap<String, String>();
             map.put(KEY_RESPONSE_VALUE, "true");
-            return ExtensionResponse.ok(new JSONObject(map));
+            return ExtensionResponse.ok(map);
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);

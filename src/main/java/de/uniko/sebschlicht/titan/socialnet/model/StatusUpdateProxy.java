@@ -2,7 +2,10 @@ package de.uniko.sebschlicht.titan.socialnet.model;
 
 import com.tinkerpop.blueprints.Vertex;
 
+import de.metalcon.domain.UidType;
+import de.metalcon.exceptions.ServiceOverloadedException;
 import de.uniko.sebschlicht.socialnet.StatusUpdate;
+import de.uniko.sebschlicht.titan.extensions.GraphityExtension;
 
 public class StatusUpdateProxy extends SocialItemProxy {
 
@@ -32,13 +35,13 @@ public class StatusUpdateProxy extends SocialItemProxy {
     }
 
     public boolean init() {
-        //        try {
-        //            long identifier = GraphityExtension.generateMuid(UidType.DISC).getValue();
-        //            setIdentifier(identifier);
-        //        } catch (ServiceOverloadedException e) {
-        //            throw new IllegalStateException(e);
-        //        }
-        setIdentifier(System.currentTimeMillis());
+        try {
+            long identifier =
+                    GraphityExtension.generateMuid(UidType.DISC).getValue();
+            setIdentifier(identifier);
+        } catch (ServiceOverloadedException e) {
+            throw new IllegalStateException(e);
+        }
         return true;
     }
 

@@ -31,10 +31,6 @@ public class ReadStatusUpdatesExtension extends GraphityExtension {
 
     protected static final String EXT_NAME = "feeds";
 
-    protected ReadStatusUpdatesExtension() {
-        super(EXT_NAME);
-    }
-
     @ExtensionDefinition(
             extensionPoint = ExtensionPoint.GRAPH)
     @ExtensionDescriptor(
@@ -61,9 +57,10 @@ public class ReadStatusUpdatesExtension extends GraphityExtension {
                 return ExtensionResponse.ok(new JSONObject(map));
             } catch (UnknownReaderIdException e) {
                 //TODO: implement client to catch this because it is no error in benchmark context
-                return ExtensionResponse.error(e);
+                return ExtensionResponse.error(e.toString());
             }
         } catch (Exception e) {
+            LOG.error(e);
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);

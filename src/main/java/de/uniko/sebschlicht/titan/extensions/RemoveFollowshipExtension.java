@@ -5,8 +5,6 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.jettison.json.JSONObject;
-
 import com.thinkaurelius.titan.core.TitanGraph;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.rexster.RexsterResourceContext;
@@ -28,10 +26,6 @@ import de.uniko.sebschlicht.graphity.exception.UnknownFollowingIdException;
 public class RemoveFollowshipExtension extends GraphityExtension {
 
     protected static final String EXT_NAME = "unfollow";
-
-    protected RemoveFollowshipExtension() {
-        super(EXT_NAME);
-    }
 
     @ExtensionDefinition(
             extensionPoint = ExtensionPoint.GRAPH)
@@ -59,12 +53,12 @@ public class RemoveFollowshipExtension extends GraphityExtension {
                 try {
                     map.put(KEY_RESPONSE_VALUE, String.valueOf(graphity
                             .removeFollowship(idFollowing, idFollowed)));
-                    return ExtensionResponse.ok(new JSONObject(map));
+                    return ExtensionResponse.ok(map);
                 } catch (UnknownFollowingIdException
                         | UnknownFollowedIdException e) {
                     //TODO: throw e but implement client to catch this because it is no error in benchmark context
-                    map.put(KEY_RESPONSE_VALUE, String.valueOf(false));
-                    return ExtensionResponse.ok(new JSONObject(map));
+                    map.put(KEY_RESPONSE_VALUE, "false");
+                    return ExtensionResponse.ok(map);
                 } catch (Exception e) {
                     if (numRetries++ >= NUM_MAX_RETRIES) {
                         throw e;

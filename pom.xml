@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.uniko.sebschlicht</groupId>
   <artifactId>titan-graphity-kibble</artifactId>
-  <version>0.0.2-SNAPSHOT</version>
+  <version>0.0.1-SNAPSHOT</version>
 
   <licenses>
     <license>
@@ -37,28 +37,29 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.thinkaurelius.titan</groupId>
-      <artifactId>titan-core</artifactId>
-      <version>${titan.version}</version>
+      <groupId>de.uniko.sebschlicht</groupId>
+      <artifactId>socialnet</artifactId>
+      <version>${socialnet.version}</version>
     </dependency>
-    <dependency>
-      <groupId>com.thinkaurelius.titan</groupId>
-      <artifactId>titan-cassandra</artifactId>
-      <version>${titan.version}</version>
-    </dependency>
-    <!-- removed for debugging
     <dependency>
       <groupId>de.metalcon</groupId>
       <artifactId>muid</artifactId>
       <version>${metalcon.muid}</version>
     </dependency>
-    -->
+    <!-- Titan -->
     <dependency>
-      <groupId>de.uniko.sebschlicht</groupId>
-      <artifactId>socialnet</artifactId>
-      <version>${socialnet.version}</version>
+      <groupId>com.thinkaurelius.titan</groupId>
+      <artifactId>titan-core</artifactId>
+      <version>${titan.version}</version>
+      <scope>provided</scope>
     </dependency>
-    <!-- rexster kibble dependencies -->
+    <dependency>
+      <groupId>com.thinkaurelius.titan</groupId>
+      <artifactId>titan-cassandra</artifactId>
+      <version>${titan.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <!-- Rexster kibble dependencies -->
     <dependency>
       <groupId>com.tinkerpop.rexster</groupId>
       <artifactId>rexster-core</artifactId>
@@ -97,55 +98,6 @@
         </configuration>
       </plugin>
 
-      <!-- Java execution plugin -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>${java.exec.version}</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>java</goal>
-            </goals>
-          </execution>
-        </executions>
-        <!-- <configuration> <mainClass>${java.exec.launcherClass}</mainClass> </configuration> -->
-      </plugin>
-
-      <!-- attach source code -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <version>${java.source-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- attach JavaDoc -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>${java.javaDoc-plugin.version}</version>
-        <configuration>
-          <encoding>UTF-8</encoding>
-          <show>private</show>
-        </configuration>
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      
       <!-- pack JAR with all dependencies -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

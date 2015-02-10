@@ -108,7 +108,7 @@ public abstract class TitanGraphity extends Graphity {
             long idUser = Long.valueOf(userIdentifier);
             if (idUser > 0) {
                 Vertex vUser = graphDb.addVertex(null);
-                vUser.setProperty(UserProxy.PROP_IDENTIFIER, userIdentifier);
+                vUser.setProperty(UserProxy.PROP_IDENTIFIER, idUser);
                 return vUser;
             }
         } catch (NumberFormatException e) {

@@ -5,8 +5,6 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.jettison.json.JSONObject;
-
 import com.thinkaurelius.titan.core.TitanGraph;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.rexster.RexsterResourceContext;
@@ -27,10 +25,6 @@ import de.uniko.sebschlicht.graphity.exception.IllegalUserIdException;
 public class AddFollowshipExtension extends GraphityExtension {
 
     protected static final String EXT_NAME = "follow";
-
-    protected AddFollowshipExtension() {
-        super(EXT_NAME);
-    }
 
     @ExtensionDefinition(
             extensionPoint = ExtensionPoint.GRAPH)
@@ -59,7 +53,7 @@ public class AddFollowshipExtension extends GraphityExtension {
                     boolean followshipAdded =
                             graphity.addFollowship(idFollowing, idFollowed);
                     map.put(KEY_RESPONSE_VALUE, String.valueOf(followshipAdded));
-                    return ExtensionResponse.ok(new JSONObject(map));
+                    return ExtensionResponse.ok(map);
                 } catch (IllegalUserIdException e) {
                     return ExtensionResponse.error(e);
                 } catch (Exception e) {
