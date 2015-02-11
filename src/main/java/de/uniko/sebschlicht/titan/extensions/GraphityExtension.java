@@ -52,8 +52,16 @@ public abstract class GraphityExtension extends AbstractRexsterExtension {
             Map<String, String> map =
                     configuration.tryGetMapFromConfiguration();
             String sSourceId = map.get(KEY_CONF_SOURCE_ID);
-            SOURCE_ID = Byte.valueOf(sSourceId);
-            LOG.info("source id set to " + SOURCE_ID);
+            if (sSourceId == null) {
+                RuntimeException e =
+                        new IllegalStateException(
+                                "[config] source id is missing");
+                LOG.error(e.getMessage());
+                throw e;
+            } else {
+                SOURCE_ID = Byte.valueOf(sSourceId);
+                LOG.info("[config] source id set to " + SOURCE_ID);
+            }
         }
         graphity = new WriteOptimizedGraphity(graph);
         graphity.init();
