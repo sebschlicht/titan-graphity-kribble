@@ -186,6 +186,11 @@ public abstract class TitanGraphity extends Graphity {
             Vertex vFollowing = loadUser(idFollowing);
             Vertex vFollowed = loadUser(idFollowed);
             if (addFollowship(vFollowing, vFollowed)) {
+                long msCrr = System.currentTimeMillis();
+                addStatusUpdate(vFollowing, new StatusUpdate(idFollowing,
+                        msCrr, "now follows " + idFollowed));
+                addStatusUpdate(vFollowed, new StatusUpdate(idFollowed, msCrr,
+                        "has new follower " + idFollowing));
                 if (autoCommit) {
                     graphDb.commit();
                 }
@@ -240,6 +245,11 @@ public abstract class TitanGraphity extends Graphity {
             //TODO can not create locks manually, but we could force lock via write access
 
             if (removeFollowship(vFollowing, vFollowed)) {
+                long msCrr = System.currentTimeMillis();
+                addStatusUpdate(vFollowing, new StatusUpdate(idFollowing,
+                        msCrr, "did unfollow " + idFollowed));
+                addStatusUpdate(vFollowed, new StatusUpdate(idFollowed, msCrr,
+                        "was unfollowed by " + idFollowing));
                 if (autoCommit) {
                     graphDb.commit();
                 }
