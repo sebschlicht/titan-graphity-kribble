@@ -41,10 +41,9 @@ public class BootstrapExtension extends GraphityExtension {
                 @RexsterContext Graph graph,
                 @ExtensionRequestParameter(
                         name = "entries",
-                        description = "Concatenation of the String array representations of the requests that will be bootstrapped.") String sEntries) {
+                        description = "Concatenation of the String array representations of the requests that will be bootstrapped.") JSONArray aEntries) {
         try {
-            // parse String to JSON array and convert to String array
-            JSONArray aEntries = new JSONArray(sEntries);
+            // parse JSON array and convert to String array
             String[] entries = new String[aEntries.length()];
             for (int i = 0; i < entries.length; ++i) {
                 entries[i] = aEntries.getString(i);
