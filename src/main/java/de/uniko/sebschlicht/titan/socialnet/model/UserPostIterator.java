@@ -9,6 +9,8 @@ public class UserPostIterator implements PostIterator {
 
     protected UserProxy pUser;
 
+    protected boolean _isInitialized;
+
     protected StatusUpdateProxy pCrrStatusUpdate;
 
     protected Vertex _vReplica;
@@ -16,7 +18,7 @@ public class UserPostIterator implements PostIterator {
     public UserPostIterator(
             UserProxy pUser) {
         this.pUser = pUser;
-        pCrrStatusUpdate = getLastUserPost(pUser);
+        _isInitialized = false;
     }
 
     public UserProxy getUser() {
@@ -51,6 +53,10 @@ public class UserPostIterator implements PostIterator {
 
     @Override
     public StatusUpdateProxy next() {
+        if (!_isInitialized) {
+            pCrrStatusUpdate = getLastUserPost(pUser);
+            _isInitialized = true;
+        }
         StatusUpdateProxy pOldStatusUpdate = pCrrStatusUpdate;
         if (pOldStatusUpdate != null) {
             Vertex vNextStatusUpdate =
@@ -75,7 +81,9 @@ public class UserPostIterator implements PostIterator {
 
     @Override
     public long getCrrPublished() {
-        if (hasNext()) {
+        if (!_isInitialized) {
+            return pUser.getLastPostTimestamp();
+        } else if (hasNext()) {
             return pCrrStatusUpdate.getPublished();
         }
         return 0;
