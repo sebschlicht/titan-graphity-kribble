@@ -5,9 +5,9 @@ import com.tinkerpop.blueprints.Vertex;
 public class UserProxy extends SocialItemProxy {
 
     /**
-     * timestamp of last stream update
+     * timestamp of last user post
      */
-    public static final String PROP_LAST_STREAM_UDPATE = "stream_update";
+    public static final String PROP_LAST_POST_TIMESTAMP = "last_post";
 
     /**
      * (optional) last recent status update posted by this user
@@ -26,13 +26,13 @@ public class UserProxy extends SocialItemProxy {
     }
 
     public void setLastPostTimestamp(long lastPostTimestamp) {
-        vertex.setProperty(PROP_LAST_STREAM_UDPATE, lastPostTimestamp);
+        vertex.setProperty(PROP_LAST_POST_TIMESTAMP, lastPostTimestamp);
         _lastPostTimestamp = lastPostTimestamp;
     }
 
     public long getLastPostTimestamp() {
         if (_lastPostTimestamp == -1) {
-            Long value = vertex.getProperty(PROP_LAST_STREAM_UDPATE);
+            Long value = vertex.getProperty(PROP_LAST_POST_TIMESTAMP);
             _lastPostTimestamp = (value == null) ? 0L : value;
         }
         return _lastPostTimestamp;
