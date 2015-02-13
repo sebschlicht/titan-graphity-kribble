@@ -9,7 +9,6 @@ import com.tinkerpop.blueprints.Vertex;
 
 import de.uniko.sebschlicht.socialnet.StatusUpdate;
 import de.uniko.sebschlicht.socialnet.StatusUpdateList;
-import de.uniko.sebschlicht.titan.Walker;
 import de.uniko.sebschlicht.titan.socialnet.EdgeType;
 import de.uniko.sebschlicht.titan.socialnet.model.PostIteratorComparator;
 import de.uniko.sebschlicht.titan.socialnet.model.StatusUpdateProxy;
@@ -61,30 +60,16 @@ public class WriteOptimizedGraphity extends TitanGraphity {
 
     @Override
     protected long addStatusUpdate(Vertex vAuthor, StatusUpdate statusUpdate) {
-        // get last recent status update
-        Vertex lastUpdate =
-                Walker.nextVertex(vAuthor, EdgeType.PUBLISHED.getLabel());
-
         // create new status update vertex and fill via proxy
         Vertex crrUpdate = graphDb.addVertex(null);
         StatusUpdateProxy pStatusUpdate = new StatusUpdateProxy(crrUpdate);
         //TODO handle service overload
-        pStatusUpdate.init();
+        pStatusUpdate.initVertex(statusUpdate.getPublished(),
+                statusUpdate.getMessage());
+
+        // add status update to user (link vertex, update user)
         UserProxy pAuthor = new UserProxy(vAuthor);
-        pStatusUpdate.setAuthor(pAuthor);
-        pStatusUpdate.setMessage(statusUpdate.getMessage());
-        pStatusUpdate.setPublished(statusUpdate.getPublished());
-
-        // update references to previous status update (if existing)
-        if (lastUpdate != null) {
-            Walker.removeSingleEdge(vAuthor, Direction.OUT,
-                    EdgeType.PUBLISHED.getLabel());
-            crrUpdate.addEdge(EdgeType.PUBLISHED.getLabel(), lastUpdate);
-        }
-
-        // add reference from user to current update node
-        vAuthor.addEdge(EdgeType.PUBLISHED.getLabel(), crrUpdate);
-        pAuthor.setLastPostTimestamp(statusUpdate.getPublished());
+        pAuthor.addStatusUpdate(pStatusUpdate);
 
         return pStatusUpdate.getIdentifier();
     }

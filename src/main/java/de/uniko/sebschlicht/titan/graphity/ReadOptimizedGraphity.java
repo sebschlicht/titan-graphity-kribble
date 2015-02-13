@@ -175,29 +175,16 @@ public class ReadOptimizedGraphity extends TitanGraphity {
 
     @Override
     protected long addStatusUpdate(Vertex vAuthor, StatusUpdate statusUpdate) {
-        // get last recent status update
-        final Vertex lastUpdate =
-                Walker.nextVertex(vAuthor, EdgeType.PUBLISHED.getLabel());
-
-        // create new status update node and fill via proxy
+        // create new status update vertex and fill via proxy
         Vertex crrUpdate = graphDb.addVertex(null);
         StatusUpdateProxy pStatusUpdate = new StatusUpdateProxy(crrUpdate);
         //TODO handle service overload
-        pStatusUpdate.init();
-        UserProxy pAuthor = new UserProxy(vAuthor);
-        pStatusUpdate.setAuthor(pAuthor);
-        pStatusUpdate.setMessage(statusUpdate.getMessage());
-        pStatusUpdate.setPublished(statusUpdate.getPublished());
+        pStatusUpdate.initVertex(statusUpdate.getPublished(),
+                statusUpdate.getMessage());
 
-        // update references to previous status update (if existing)
-        if (lastUpdate != null) {
-            Walker.removeSingleEdge(vAuthor, Direction.OUT,
-                    EdgeType.PUBLISHED.getLabel());
-            crrUpdate.addEdge(EdgeType.PUBLISHED.getLabel(), lastUpdate);
-        }
-        // add reference from user to current update node
-        vAuthor.addEdge(EdgeType.PUBLISHED.getLabel(), crrUpdate);
-        pAuthor.setLastPostTimestamp(statusUpdate.getPublished());
+        // add status update to user (link vertex, update user)
+        UserProxy pAuthor = new UserProxy(vAuthor);
+        pAuthor.addStatusUpdate(pStatusUpdate);
 
         // update ego networks of status update author followers
         updateEgoNetworks(vAuthor);

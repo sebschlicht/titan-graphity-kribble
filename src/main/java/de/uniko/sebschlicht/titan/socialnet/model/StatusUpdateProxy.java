@@ -34,7 +34,7 @@ public class StatusUpdateProxy extends SocialItemProxy {
         super(vStatusUpdate);
     }
 
-    public boolean init() {
+    public void initVertex(long published, String message) {
         try {
             long identifier =
                     GraphityExtension.generateMuid(UidType.DISC).getValue();
@@ -42,7 +42,8 @@ public class StatusUpdateProxy extends SocialItemProxy {
         } catch (ServiceOverloadedException e) {
             throw new IllegalStateException(e);
         }
-        return true;
+        setPublished(published);
+        setMessage(message);
     }
 
     public void setAuthor(UserProxy pAuthor) {

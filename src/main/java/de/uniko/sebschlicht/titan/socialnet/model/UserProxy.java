@@ -1,6 +1,10 @@
 package de.uniko.sebschlicht.titan.socialnet.model;
 
+import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
+
+import de.uniko.sebschlicht.titan.Walker;
+import de.uniko.sebschlicht.titan.socialnet.EdgeType;
 
 public class UserProxy extends SocialItemProxy {
 
@@ -23,6 +27,43 @@ public class UserProxy extends SocialItemProxy {
             Vertex vUser) {
         super(vUser);
         _lastPostTimestamp = -1;
+    }
+
+    /**
+     * Adds a status update to the user.<br>
+     * Links the status update node to the user node and to previous updates if
+     * any.
+     * Updates the author node's last post timestamp.
+     * 
+     * @param pStatusUpdate
+     *            proxy of the new status update
+     */
+    public void addStatusUpdate(StatusUpdateProxy pStatusUpdate) {
+        linkStatusUpdate(pStatusUpdate);
+        // update last post timestamp
+        setLastPostTimestamp(pStatusUpdate.getPublished());
+    }
+
+    /**
+     * Links a status update node to the user node and to previous updates if
+     * any.
+     * 
+     * @param pStatusUpdate
+     *            proxy of the status update
+     */
+    public void linkStatusUpdate(StatusUpdateProxy pStatusUpdate) {
+        // get last recent status update
+        Vertex lastUpdate =
+                Walker.nextVertex(vertex, EdgeType.PUBLISHED.getLabel());
+        // update references to previous status update (if existing)
+        if (lastUpdate != null) {
+            Walker.removeSingleEdge(vertex, Direction.OUT,
+                    EdgeType.PUBLISHED.getLabel());
+            pStatusUpdate.getVertex().addEdge(EdgeType.PUBLISHED.getLabel(),
+                    lastUpdate);
+        }
+        // add reference from user to current update node
+        vertex.addEdge(EdgeType.PUBLISHED.getLabel(), pStatusUpdate.getVertex());
     }
 
     public void setLastPostTimestamp(long lastPostTimestamp) {
