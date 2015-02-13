@@ -31,9 +31,9 @@ public class UserProxy extends SocialItemProxy {
 
     /**
      * Adds a status update to the user.<br>
-     * Links the status update node to the user node and to previous updates if
-     * any.
-     * Updates the author node's last post timestamp.
+     * Links the status update vertex to the user vertex and to previous updates
+     * if any.
+     * Updates the author vertex's last post timestamp.
      * 
      * @param pStatusUpdate
      *            proxy of the new status update
@@ -45,7 +45,8 @@ public class UserProxy extends SocialItemProxy {
     }
 
     /**
-     * Links a status update node to the user node and to previous updates if
+     * Links a status update vertex to the user vertex and to previous updates
+     * if
      * any.
      * 
      * @param pStatusUpdate

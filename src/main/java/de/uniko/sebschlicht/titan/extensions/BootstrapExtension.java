@@ -5,7 +5,10 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
+import java.util.TreeSet;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 
@@ -21,7 +24,9 @@ import com.tinkerpop.rexster.extension.ExtensionRequestParameter;
 import com.tinkerpop.rexster.extension.ExtensionResponse;
 import com.tinkerpop.rexster.extension.RexsterContext;
 
+import de.uniko.sebschlicht.titan.graphity.ReadOptimizedGraphity;
 import de.uniko.sebschlicht.titan.graphity.TitanGraphity;
+import de.uniko.sebschlicht.titan.graphity.WriteOptimizedGraphity;
 import de.uniko.sebschlicht.titan.socialnet.model.StatusUpdateProxy;
 import de.uniko.sebschlicht.titan.socialnet.model.UserProxy;
 
@@ -64,8 +69,8 @@ public class BootstrapExtension extends GraphityExtension {
                 @RexsterContext RexsterResourceContext context,
                 @RexsterContext Graph graph,
                 @ExtensionRequestParameter(
-                        name = "users",
-                        description = "Identifiers of registered users.") JSONArray aRegistrations,
+                        name = "subscriptions",
+                        description = "Identifiers of users subscribed to accessible by the subscriber's user identifier.") JSONObject oSubscriptions,
                 @ExtensionRequestParameter(
                         name = "posts",
                         description = "Number of status updates accessible by its author's user identifier.") JSONObject oPosts) {
@@ -76,58 +81,99 @@ public class BootstrapExtension extends GraphityExtension {
 
             int postLength = 140;
 
-            // add vertices to graph
-            Map<Long, Object> userVertices = new HashMap<Long, Object>();
-            Map<Long, long[]> postsUsers = new HashMap<Long, long[]>();
-            int numRegistrations = aRegistrations.length();
-            long idUser;
-            Vertex vUser;
-            // add users
-            for (int i = 0; i < numRegistrations; ++i) {
-                idUser = aRegistrations.getLong(i);
-                vUser = graphDb.addVertex(null);
-                userVertices.put(idUser, vUser.getId());
-            }
-            Map<Long, Object> verticesPosts = new HashMap<Long, Object>();
-            JSONArray aUserIds = oPosts.names();
-            int numPoster = aUserIds.length();
+            // load user set
+            Set<Long> userIds = new TreeSet<Long>();
+            JSONArray aUserIds = oSubscriptions.names();
+            int numSubscribers = aUserIds.length();
             String sIdUser;
+            long idUser;
+            int numUserSubscriptions;
+            long idFollowed;
+            for (int i = 0; i < numSubscribers; ++i) {
+                // add subscriber
+                sIdUser = aUserIds.getString(i);
+                idUser = Long.valueOf(sIdUser);
+                userIds.add(idUser);
+                // add users followed
+                JSONArray aUsersFollowed = oSubscriptions.getJSONArray(sIdUser);
+                numUserSubscriptions = aUsersFollowed.length();
+                long[] userSubscriptions = new long[numUserSubscriptions];
+                for (int iFollowed = 0; i < numUserSubscriptions; ++iFollowed) {
+                    idFollowed = aUsersFollowed.getLong(iFollowed);
+                    userIds.add(idFollowed);
+                    userSubscriptions[iFollowed] = idFollowed;
+                }
+            }
+
+            // add vertices to graph
+            // add users
+            Map<Long, Object> userVertices = new HashMap<Long, Object>();
+            Vertex vUser;
+            for (long userId : userIds) {
+                vUser = graphDb.addVertex(null);
+                userVertices.put(userId, vUser.getId());
+            }
+            // add posts
+            Map<Long, Object[]> postsVertices = new HashMap<Long, Object[]>();
+            aUserIds = oPosts.names();
+            int numPoster = aUserIds.length();
             Vertex vPost;
             StatusUpdateProxy pStatusUpdate;
-            // add posts
             for (int i = 0; i < numPoster; ++i) {
                 sIdUser = aUserIds.getString(i);
                 idUser = Long.valueOf(sIdUser);
                 int numUserPosts = oPosts.getInt(sIdUser);
-                long[] postsUser = new long[numUserPosts];
+                Object[] postVertices = new Object[numUserPosts];
                 for (int iPost = 0; iPost < numUserPosts; ++iPost) {
                     vPost = graphDb.addVertex(null);
                     pStatusUpdate = new StatusUpdateProxy(vPost);
                     pStatusUpdate.initVertex(System.currentTimeMillis(),
                             generatePostMessage(postLength));
-                    verticesPosts.put(pStatusUpdate.getIdentifier(),
-                            vPost.getId());
-                    postsUser[iPost] = pStatusUpdate.getIdentifier();
+                    postVertices[iPost] = vPost.getId();
                 }
-                postsUsers.put(idUser, postsUser);
+                postsVertices.put(idUser, postVertices);
             }
 
             // add edges to graph
             UserProxy pAuthor;
             Object idVertex;
+            // add post edges
             for (int i = 0; i < numPoster; ++i) {
                 idUser = aUserIds.getLong(i);
                 idVertex = userVertices.get(idUser);
                 vUser = graphDb.getVertex(idVertex);
                 pAuthor = new UserProxy(vUser);
-                long[] postsUser = postsUsers.get(idUser);
-                for (long idPost : postsUser) {
-                    idVertex = verticesPosts.get(idPost);
-                    vPost = graphDb.getVertex(idVertex);
+                Object[] postVertices = postsVertices.get(idUser);
+                for (Object idPostVertex : postVertices) {
+                    vPost = graphDb.getVertex(idPostVertex);
                     pStatusUpdate = new StatusUpdateProxy(vPost);
                     pAuthor.linkStatusUpdate(pStatusUpdate);
                 }
             }
+            // add subscription edges
+            aUserIds = oSubscriptions.names();
+            Vertex vFollowed;
+            for (int i = 0; i < numSubscribers; ++i) {
+                sIdUser = aUserIds.getString(i);
+                idUser = Long.valueOf(sIdUser);
+                vUser = graphDb.getVertex(userVertices.get(idUser));
+                pAuthor = new UserProxy(vUser);
+                JSONArray aUsersFollowed = oSubscriptions.getJSONArray(sIdUser);
+                numUserSubscriptions = aUsersFollowed.length();
+                for (int iFollowed = 0; i < numUserSubscriptions; ++iFollowed) {
+                    idUser = aUsersFollowed.getLong(iFollowed);
+                    vFollowed = graphDb.getVertex(userVertices.get(idUser));
+                    if (graphity instanceof WriteOptimizedGraphity) {
+                        ((WriteOptimizedGraphity) graphity).doAddFollowship(
+                                vUser, vFollowed);
+                    } else if (graphity instanceof ReadOptimizedGraphity) {
+                        throw new NotImplementedException(
+                                "bootstrap not implemented for ReadOptimizedGraphity");
+                    }
+                }
+            }
+
+            // TODO build Graphity index if using ReadOptimizedGraphity
 
             Map<String, String> map = new HashMap<String, String>();
             map.put(KEY_RESPONSE_VALUE, "true");

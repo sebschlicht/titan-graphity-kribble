@@ -34,6 +34,15 @@ public class StatusUpdateProxy extends SocialItemProxy {
         super(vStatusUpdate);
     }
 
+    /**
+     * Initialized the status update vertex wrapped by this proxy.
+     * Sets vertex properties only.
+     * 
+     * @param published
+     *            timestamp of publishing
+     * @param message
+     *            status update content
+     */
     public void initVertex(long published, String message) {
         try {
             long identifier =

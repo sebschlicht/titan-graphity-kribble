@@ -32,9 +32,13 @@ public class WriteOptimizedGraphity extends TitanGraphity {
             }
         }
 
+        doAddFollowship(vFollowing, vFollowed);
+        return true;
+    }
+
+    public void doAddFollowship(Vertex vFollowing, Vertex vFollowed) {
         // create star topology
         vFollowing.addEdge(EdgeType.FOLLOWS.getLabel(), vFollowed);
-        return true;
     }
 
     @Override
