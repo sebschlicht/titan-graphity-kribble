@@ -4,7 +4,7 @@ public class User {
 
     private Object _vertexId;
 
-    private long[] _subscriptions;
+    private User[] _subscriptions;
 
     private long _tsLastPost;
 
@@ -14,11 +14,11 @@ public class User {
         _tsLastPost = 0;
     }
 
-    public void setSubscriptions(long[] subscriptions) {
+    public void setSubscriptions(User[] subscriptions) {
         _subscriptions = subscriptions;
     }
 
-    public long[] getSubscriptions() {
+    public User[] getSubscriptions() {
         return _subscriptions;
     }
 

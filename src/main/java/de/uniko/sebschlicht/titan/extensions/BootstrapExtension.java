@@ -88,6 +88,7 @@ public class BootstrapExtension extends GraphityExtension {
             // load users
             int numSubscriptions;
             long idFollowed;
+            User followed;
             JSONArray aUserIds = oSubscriptions.names();
             int numSubscribers = aUserIds.length();
             for (int iUser = 0; iUser < numSubscribers; ++iUser) {
@@ -98,11 +99,11 @@ public class BootstrapExtension extends GraphityExtension {
                 // add users followed
                 JSONArray aUsersFollowed = oSubscriptions.getJSONArray(sIdUser);
                 numSubscriptions = aUsersFollowed.length();
-                long[] subscriptions = new long[numSubscriptions];
+                User[] subscriptions = new User[numSubscriptions];
                 for (int iFollowed = 0; iFollowed < numSubscriptions; ++iFollowed) {
                     idFollowed = aUsersFollowed.getLong(iFollowed);
-                    users.loadUser(idFollowed);// can add user
-                    subscriptions[iFollowed] = idFollowed;
+                    followed = users.loadUser(idFollowed);// can add user
+                    subscriptions[iFollowed] = followed;
                 }
                 user.setSubscriptions(subscriptions);
             }
@@ -163,11 +164,8 @@ public class BootstrapExtension extends GraphityExtension {
                 user = users.loadUser(userId);// can not add user
                 vUser = graphDb.getVertex(user.getVertexId());
                 pAuthor = new UserProxy(vUser);
-                long[] subscriptions = user.getSubscriptions();
-                for (long followedId : subscriptions) {
-                    vFollowed =
-                            graphDb.getVertex(users.loadUser(followedId)
-                                    .getVertexId());
+                for (User tmpFollowed : user.getSubscriptions()) {
+                    vFollowed = graphDb.getVertex(tmpFollowed.getVertexId());
                     if (graphity instanceof WriteOptimizedGraphity) {
                         ((WriteOptimizedGraphity) graphity).doAddFollowship(
                                 vUser, vFollowed);
