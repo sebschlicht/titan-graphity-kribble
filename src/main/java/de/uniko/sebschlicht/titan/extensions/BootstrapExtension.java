@@ -152,8 +152,8 @@ public class BootstrapExtension extends GraphityExtension {
                     vPost = graphDb.getVertex(idPostVertex);
                     pStatusUpdate = new StatusUpdateProxy(vPost);
                     pAuthor.linkStatusUpdate(pStatusUpdate);
-                    pAuthor.setLastPostTimestamp(user.getLastPostTimestamp());
                 }
+                pAuthor.setLastPostTimestamp(user.getLastPostTimestamp());
             }
             // add subscription edges
             aUserIds = oSubscriptions.names();
