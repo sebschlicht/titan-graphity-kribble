@@ -69,57 +69,70 @@ public class BootstrapExtension extends GraphityExtension {
                 @RexsterContext RexsterResourceContext context,
                 @RexsterContext Graph graph,
                 @ExtensionRequestParameter(
+                        name = "userIds") JSONArray aUserIds,
+                @ExtensionRequestParameter(
                         name = "subscriptions",
                         description = "Identifiers of users subscribed to accessible by the subscriber's user identifier.") JSONObject oSubscriptions,
                 @ExtensionRequestParameter(
-                        name = "posts",
-                        description = "Number of status updates accessible by its author's user identifier.") JSONObject oPosts) {
+                        name = "numPosts") JSONArray aNumPosts) {
         try {
             TitanGraphity graphity =
                     getGraphityInstance(context, (TitanGraph) graph);
             TitanGraph graphDb = graphity.getGraph();
 
+            /**
+             * expected format:
+             * {
+             * "userIds": [1,2,3,4,5],// only users we need
+             * "subscriptions": {// only users that subscribed
+             * \t"2": [1,3,5],
+             * \t"3": [1,4],
+             * \t"4": [1,3],
+             * \t"5": [4]
+             * },
+             * "numPosts": [0,6,5,18,4]// even if none
+             * }
+             */
             int postLength = 140;
             UserManager users = new UserManager();
             String sIdUser;
             long userId;
             User user;
 
-            // load users
+            // load subscriptions
             int numSubscriptions;
             long idFollowed;
-            User followed;
-            JSONArray aUserIds = oSubscriptions.names();
-            int numSubscribers = aUserIds.length();
+            JSONArray aSubscriberIds = oSubscriptions.names();
+            int numSubscribers = aSubscriberIds.length();
             for (int iUser = 0; iUser < numSubscribers; ++iUser) {
-                // add subscriber
                 sIdUser = aUserIds.getString(iUser);
                 userId = Long.valueOf(sIdUser);
                 user = users.loadUser(userId);// will add user
-                // add users followed
                 JSONArray aUsersFollowed = oSubscriptions.getJSONArray(sIdUser);
                 numSubscriptions = aUsersFollowed.length();
                 User[] subscriptions = new User[numSubscriptions];
                 for (int iFollowed = 0; iFollowed < numSubscriptions; ++iFollowed) {
                     idFollowed = aUsersFollowed.getLong(iFollowed);
-                    followed = users.loadUser(idFollowed);// can add user
-                    subscriptions[iFollowed] = followed;
+                    subscriptions[iFollowed] = users.loadUser(idFollowed);// can add user
                 }
                 user.setSubscriptions(subscriptions);
             }
 
             // add vertices to graph
             // add posts
+            int numUserPosts;
             Vertex vPost;
             long tsLastPost = 0;
-            aUserIds = oPosts.names();
             StatusUpdateProxy pStatusUpdate;
             int numPoster = aUserIds.length();
             for (int i = 0; i < numPoster; ++i) {
                 sIdUser = aUserIds.getString(i);
                 userId = Long.valueOf(sIdUser);
                 user = users.loadUser(userId);// can add user
-                int numUserPosts = oPosts.getInt(sIdUser);
+                numUserPosts = aNumPosts.getInt(i);
+                if (numUserPosts == 0) {
+                    continue;
+                }
                 Object[] postVertices = new Object[numUserPosts];
                 for (int iPost = 0; iPost < numUserPosts; ++iPost) {
                     vPost = graphDb.addVertex(null);
@@ -156,16 +169,14 @@ public class BootstrapExtension extends GraphityExtension {
                 pAuthor.setLastPostTimestamp(user.getLastPostTimestamp());
             }
             // add subscription edges
-            aUserIds = oSubscriptions.names();
             Vertex vFollowed;
             for (int i = 0; i < numSubscribers; ++i) {
-                sIdUser = aUserIds.getString(i);
+                sIdUser = aSubscriberIds.getString(i);
                 userId = Long.valueOf(sIdUser);
                 user = users.loadUser(userId);// can not add user
                 vUser = graphDb.getVertex(user.getVertexId());
-                pAuthor = new UserProxy(vUser);
-                for (User tmpFollowed : user.getSubscriptions()) {
-                    vFollowed = graphDb.getVertex(tmpFollowed.getVertexId());
+                for (User followed : user.getSubscriptions()) {
+                    vFollowed = graphDb.getVertex(followed.getVertexId());
                     if (graphity instanceof WriteOptimizedGraphity) {
                         ((WriteOptimizedGraphity) graphity).doAddFollowship(
                                 vUser, vFollowed);
