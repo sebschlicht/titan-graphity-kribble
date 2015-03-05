@@ -6,14 +6,15 @@ import com.thinkaurelius.titan.core.TitanGraph;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 
+import de.uniko.sebschlicht.graphity.titan.EdgeType;
+import de.uniko.sebschlicht.graphity.titan.TitanGraphity;
+import de.uniko.sebschlicht.graphity.titan.Walker;
+import de.uniko.sebschlicht.graphity.titan.model.PostIteratorComparator;
+import de.uniko.sebschlicht.graphity.titan.model.StatusUpdateProxy;
+import de.uniko.sebschlicht.graphity.titan.model.UserPostIterator;
+import de.uniko.sebschlicht.graphity.titan.model.UserProxy;
 import de.uniko.sebschlicht.socialnet.StatusUpdate;
 import de.uniko.sebschlicht.socialnet.StatusUpdateList;
-import de.uniko.sebschlicht.titan.Walker;
-import de.uniko.sebschlicht.titan.socialnet.EdgeType;
-import de.uniko.sebschlicht.titan.socialnet.model.PostIteratorComparator;
-import de.uniko.sebschlicht.titan.socialnet.model.StatusUpdateProxy;
-import de.uniko.sebschlicht.titan.socialnet.model.UserPostIterator;
-import de.uniko.sebschlicht.titan.socialnet.model.UserProxy;
 
 public class ReadOptimizedGraphity extends TitanGraphity {
 

@@ -36,10 +36,11 @@
   </properties>
 
   <dependencies>
+    <!-- Graphity@Titan -->
     <dependency>
       <groupId>de.uniko.sebschlicht</groupId>
-      <artifactId>socialnet</artifactId>
-      <version>${socialnet.version}</version>
+      <artifactId>graphity-titan</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>de.metalcon</groupId>

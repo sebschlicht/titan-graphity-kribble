@@ -14,8 +14,8 @@ import de.metalcon.domain.Muid;
 import de.metalcon.domain.UidType;
 import de.metalcon.domain.helper.UidConverter;
 import de.metalcon.exceptions.ServiceOverloadedException;
-import de.uniko.sebschlicht.titan.graphity.TitanGraphity;
-import de.uniko.sebschlicht.titan.graphity.WriteOptimizedGraphity;
+import de.uniko.sebschlicht.graphity.titan.TitanGraphity;
+import de.uniko.sebschlicht.graphity.titan.impl.WriteOptimizedGraphity;
 
 public abstract class GraphityExtension extends AbstractRexsterExtension {
 
