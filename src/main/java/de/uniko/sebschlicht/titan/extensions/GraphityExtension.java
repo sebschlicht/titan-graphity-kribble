@@ -1,7 +1,6 @@
 package de.uniko.sebschlicht.titan.extensions;
 
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 
@@ -10,10 +9,6 @@ import com.tinkerpop.rexster.RexsterResourceContext;
 import com.tinkerpop.rexster.extension.AbstractRexsterExtension;
 import com.tinkerpop.rexster.extension.ExtensionConfiguration;
 
-import de.metalcon.domain.Muid;
-import de.metalcon.domain.UidType;
-import de.metalcon.domain.helper.UidConverter;
-import de.metalcon.exceptions.ServiceOverloadedException;
 import de.uniko.sebschlicht.graphity.titan.TitanGraphity;
 import de.uniko.sebschlicht.graphity.titan.impl.WriteOptimizedGraphity;
 
@@ -30,10 +25,6 @@ public abstract class GraphityExtension extends AbstractRexsterExtension {
     protected static final int NUM_MAX_RETRIES = 0;
 
     protected static byte SOURCE_ID = 0;
-
-    protected static int LAST_MUID_CREATION_TIME = 0;
-
-    protected static AtomicInteger LAST_MUID_ID = new AtomicInteger(0);
 
     protected TitanGraphity graphity = null;
 
@@ -61,32 +52,11 @@ public abstract class GraphityExtension extends AbstractRexsterExtension {
             } else {
                 SOURCE_ID = Byte.valueOf(sSourceId);
                 LOG.info("[config] source id set to " + SOURCE_ID);
+                TitanGraphity.setTitanId(SOURCE_ID);
             }
         }
         graphity = new WriteOptimizedGraphity(graph);
         graphity.init();
         return graphity;
-    }
-
-    public static Muid generateMuid(UidType type)
-            throws ServiceOverloadedException {
-        int timestamp = (int) (System.currentTimeMillis() / 1000);
-        short id = 0;
-        if (timestamp == LAST_MUID_CREATION_TIME) {
-            if (LAST_MUID_ID.intValue() == UidConverter.getMaximumMuidID()) {
-                // more than 65535 MUIDs / second
-                // we could separate this number by type
-                throw new ServiceOverloadedException(
-                        "Alreay created more then "
-                                + UidConverter.getMaximumMuidID()
-                                + " during the current second");
-            }
-            id = (short) LAST_MUID_ID.incrementAndGet();
-        } else {
-            LAST_MUID_ID.set(0);
-            LAST_MUID_CREATION_TIME = timestamp;
-        }
-        return Muid.createFromID(UidConverter.calculateMuidWithoutChecking(
-                type.getRawIdentifier(), SOURCE_ID, timestamp, id));
     }
 }
