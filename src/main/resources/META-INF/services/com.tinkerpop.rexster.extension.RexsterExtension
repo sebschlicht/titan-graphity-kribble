@@ -1,5 +1,4 @@
 de.uniko.sebschlicht.titan.extensions.AddFollowshipExtension
 de.uniko.sebschlicht.titan.extensions.AddStatusUpdateExtension
-de.uniko.sebschlicht.titan.extensions.BootstrapExtension
 de.uniko.sebschlicht.titan.extensions.ReadStatusUpdatesExtension
 de.uniko.sebschlicht.titan.extensions.RemoveFollowshipExtension
