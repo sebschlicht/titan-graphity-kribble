@@ -10,6 +10,7 @@ import com.tinkerpop.rexster.extension.AbstractRexsterExtension;
 import com.tinkerpop.rexster.extension.ExtensionConfiguration;
 
 import de.uniko.sebschlicht.graphity.titan.TitanGraphity;
+import de.uniko.sebschlicht.graphity.titan.impl.ReadOptimizedGraphity;
 import de.uniko.sebschlicht.graphity.titan.impl.WriteOptimizedGraphity;
 
 public abstract class GraphityExtension extends AbstractRexsterExtension {
@@ -20,13 +21,26 @@ public abstract class GraphityExtension extends AbstractRexsterExtension {
 
     protected static final String KEY_CONF_SOURCE_ID = "sourceId";
 
+    protected static final String KEY_CONF_ALGORITHM = "algorithm";
+
     protected static final String KEY_RESPONSE_VALUE = "responseValue";
 
     protected static final int NUM_MAX_RETRIES = 0;
 
     protected static byte SOURCE_ID = 0;
 
+    protected static boolean IS_READ_OPTIMIZED_GRAPHITY;
+
     protected TitanGraphity graphity = null;
+
+    protected RuntimeException buildConfigException(String key, String message) {
+        StringBuilder errorMessage = new StringBuilder();
+        errorMessage.append("[config:");
+        errorMessage.append(key);
+        errorMessage.append("] ");
+        errorMessage.append(message);
+        return new IllegalStateException(errorMessage.toString());
+    }
 
     protected TitanGraphity getGraphityInstance(
             RexsterResourceContext context,
@@ -45,8 +59,8 @@ public abstract class GraphityExtension extends AbstractRexsterExtension {
             String sSourceId = map.get(KEY_CONF_SOURCE_ID);
             if (sSourceId == null) {
                 RuntimeException e =
-                        new IllegalStateException(
-                                "[config] source id is missing");
+                        buildConfigException(KEY_CONF_SOURCE_ID,
+                                "Source id is missing!");
                 LOG.error(e.getMessage());
                 throw e;
             } else {
@@ -54,8 +68,23 @@ public abstract class GraphityExtension extends AbstractRexsterExtension {
                 LOG.info("[config] source id set to " + SOURCE_ID);
                 TitanGraphity.setTitanId(SOURCE_ID);
             }
+            String sAlgorithm = map.get(KEY_CONF_ALGORITHM);
+            if ("read-optimized".equalsIgnoreCase(sAlgorithm)) {
+                IS_READ_OPTIMIZED_GRAPHITY = true;
+            } else if ("write-optimized".equalsIgnoreCase(sAlgorithm)) {
+                IS_READ_OPTIMIZED_GRAPHITY = false;
+            } else {
+                RuntimeException e =
+                        buildConfigException(KEY_CONF_ALGORITHM,
+                                "Invalid algorithm identifier! Use \"read-optimized\" or \"write-optimized\".");
+                LOG.error(e.getMessage());
+                throw e;
+            }
         }
-        graphity = new WriteOptimizedGraphity(graph);
+        graphity =
+                IS_READ_OPTIMIZED_GRAPHITY
+                        ? new ReadOptimizedGraphity(graph)
+                        : new WriteOptimizedGraphity(graph);
         graphity.init();
         return graphity;
     }
