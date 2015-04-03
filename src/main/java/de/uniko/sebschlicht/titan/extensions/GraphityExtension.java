@@ -10,7 +10,7 @@ import com.tinkerpop.rexster.extension.AbstractRexsterExtension;
 import com.tinkerpop.rexster.extension.ExtensionConfiguration;
 
 import de.uniko.sebschlicht.graphity.titan.TitanGraphity;
-import de.uniko.sebschlicht.graphity.titan.impl.ReadOptimizedGraphity;
+import de.uniko.sebschlicht.graphity.titan.impl.ReadOptimizedECGraphity;
 import de.uniko.sebschlicht.graphity.titan.impl.WriteOptimizedGraphity;
 
 public abstract class GraphityExtension extends AbstractRexsterExtension {
@@ -83,7 +83,7 @@ public abstract class GraphityExtension extends AbstractRexsterExtension {
         }
         graphity =
                 IS_READ_OPTIMIZED_GRAPHITY
-                        ? new ReadOptimizedGraphity(graph)
+                        ? new ReadOptimizedECGraphity(graph)
                         : new WriteOptimizedGraphity(graph);
         graphity.init();
         return graphity;

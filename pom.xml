@@ -31,7 +31,7 @@
     <!-- dependency versions: production -->
     <titan.version>0.5.0</titan.version>
     <metalcon.muid>0.4.2</metalcon.muid>
-    <graphity.version>0.1.0-SNAPSHOT</graphity.version>
+    <graphity.version>0.2.0-SNAPSHOT</graphity.version>
     <rexster.version>2.5.0</rexster.version>
   </properties>
 
